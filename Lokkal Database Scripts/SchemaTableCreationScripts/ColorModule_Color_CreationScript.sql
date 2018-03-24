@@ -1,14 +1,11 @@
-CREATE SCHEMA ColorModule;
-GO
-CREATE TABLE ColorModule.Color
+CREATE TABLE ColorModule_Color
 (
-	ColorID int IDENTITY (1,1) NOT NULL
+	ColorID int NOT NULL AUTO_INCREMENT
 	, Name varchar(10) NOT NULL
-	CONSTRAINT PK_Color_ColorID PRIMARY KEY CLUSTERED (ColorID)
+	, CONSTRAINT PK_Color_ColorID PRIMARY KEY CLUSTERED (ColorID)
 );
-GO
 
-
---SELECT * FROM ColorModule.Color
+--SELECT * FROM ColorModule_Color;
+--DROP TABLE ColorModule_Color;
 
 

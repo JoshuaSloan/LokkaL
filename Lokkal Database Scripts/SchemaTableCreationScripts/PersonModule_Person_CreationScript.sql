@@ -1,32 +1,30 @@
-CREATE SCHEMA PersonModule;
-GO
-CREATE TABLE PersonModule.Person
+CREATE TABLE PersonModule_Person
 (
-	PersonID int IDENTITY (1,1) NOT NULL
+	PersonID int NOT NULL AUTO_INCREMENT
 	, FirstName varchar(50) NOT NULL
 	, LastName varchar(50) NOT NULL
 	, DateOfBirth date NOT NULL
 	, Email varchar(50) NOT NULL
 	, Password varchar(16) NOT NULL
 	, Active BIT NULL
-	CONSTRAINT PK_Person_PersonID PRIMARY KEY CLUSTERED (PersonID)
+	, CONSTRAINT PK_Person_PersonID PRIMARY KEY CLUSTERED (PersonID)
 );
-GO
 
-
-CREATE TABLE PersonModule.Friendship
+CREATE TABLE PersonModule_Friendship
 (
-	FriendshipID INT IDENTITY(1,1) NOT NULL
+	FriendshipID INT NOT NULL AUTO_INCREMENT
 	, LeftPersonID INT NOT NULL
 	, RightPersonID INT NOT NULL
 	, StartDate datetime NOT NULL
 	, EndDate datetime NULL
 	, Active BIT NULL
-	CONSTRAINT PK_Friendship_FriendshipID PRIMARY KEY CLUSTERED (FriendshipID)
+	, CONSTRAINT PK_Friendship_FriendshipID PRIMARY KEY CLUSTERED (FriendshipID)
 	, CONSTRAINT FK_Person_LeftPersonID FOREIGN KEY (LeftPersonID)
-	REFERENCES PersonModule.Person (PersonID)
+	REFERENCES PersonModule_Person (PersonID)
 	, CONSTRAINT FK_Person_RightPersonID FOREIGN KEY (RightPersonID)
-	REFERENCES PersonModule.Person (PersonID)
-)
---SELECT * FROM PersonModule.Person
---SELECT * FROM PersonModule.Friendship
+	REFERENCES PersonModule_Person (PersonID)
+);
+--SELECT * FROM PersonModule_Person;
+--SELECT * FROM PersonModule_Friendship;
+--DROP TABLE PersonModule_Friendship;
+--DROP TABLE PersonModule_Person;
