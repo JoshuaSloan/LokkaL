@@ -2,18 +2,27 @@ package edu.jsloan3uwyo.lokkal;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -37,13 +46,18 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
     private Marker previousMarker = null;
+
+    private Toolbar toolbar;
+    private ActionBarDrawerToggle drawerToggle;
+    private DrawerLayout drawerlayout;
+    private NavigationView navView;
 
     Location mLastLocation; //TODO need to possibly make this local and pass it instead
     LatLng lastLocationCoordinates;
@@ -56,6 +70,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+
+        //create the main toolbar
+        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setLogo(R.drawable.lokkal1);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        //getSupportActionBar().setTitle(R.string.app_name);
+
+        //create the drawer
+        drawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        drawerToggle =new ActionBarDrawerToggle(this, drawerlayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                invalidateOptionsMenu();
+            }
+        };
+        drawerlayout.setDrawerListener(drawerToggle);
+
+        navView = (NavigationView) findViewById(R.id.navview);
+
+        //access the menu item options
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                int id = menuItem.getItemId();
+
+                if(id == R.id.group_management) {
+                    Toast.makeText(getApplicationContext(), "Go to group management", Toast.LENGTH_LONG).show();
+                    drawerlayout.closeDrawers();
+                    return true;
+                }
+                else if (id == R.id.settings)
+                {
+                    Toast.makeText(getApplicationContext(), "Go to settings", Toast.LENGTH_LONG).show();
+                    drawerlayout.closeDrawers();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        //////////////////////////////////////////////////////////////////////////////////////
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         //TODO: Remove once permissions are fixed in the main login activity
@@ -133,6 +203,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_items, menu);
+        return true;
     }
 
     @Override

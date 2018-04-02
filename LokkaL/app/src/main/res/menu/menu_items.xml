@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/group_management"
+            android:checked="true"
+            android:icon="@mipmap/ic_group"
+            android:title="Group Management" />
+        <item
+            android:id="@+id/settings"
+            android:checked="true"
+            android:icon="@mipmap/ic_launcher"
+            android:title="Settings" />
+    </group>
+</menu>
