@@ -19,6 +19,7 @@ CREATE TABLE GroupModule_GroupMembers
 	, StartTime datetime NOT NULL
 	, EndTime datetime NULL
 	, ColorID INT NULL
+	, Accepted BIT NULL
 	, Active BIT NULL
 	, CONSTRAINT PK_GroupMember_GroupMemberID PRIMARY KEY (GroupMemberID)
     , CONSTRAINT FK_GroupMember_PersonID FOREIGN KEY (PersonID)

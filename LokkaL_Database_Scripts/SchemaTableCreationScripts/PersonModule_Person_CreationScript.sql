@@ -17,6 +17,7 @@ CREATE TABLE PersonModule_Friendship
 	, RightPersonID INT NOT NULL
 	, StartDate datetime NOT NULL
 	, EndDate datetime NULL
+	, Accepted BIT NULL
 	, Active BIT NULL
 	, CONSTRAINT PK_Friendship_FriendshipID PRIMARY KEY CLUSTERED (FriendshipID)
 	, CONSTRAINT FK_Person_LeftPersonID FOREIGN KEY (LeftPersonID)
