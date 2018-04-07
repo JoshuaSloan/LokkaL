@@ -115,9 +115,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     drawerlayout.closeDrawers();
                     return true;
                 }
-                else if (id == R.id.settings)
+                else if (id == R.id.group_requests)
                 {
-                    Toast.makeText(getApplicationContext(), "Go to settings", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Go to group requests", Toast.LENGTH_LONG).show();
+                    drawerlayout.closeDrawers();
+                    return true;
+                }
+                else if (id == R.id.friends)
+                {
+                    Toast.makeText(getApplicationContext(), "Go to group requests", Toast.LENGTH_LONG).show();
+                    drawerlayout.closeDrawers();
+                    return true;
+                }
+                else if (id == R.id.friend_requests)
+                {
+                    Toast.makeText(getApplicationContext(), "Go to group requests", Toast.LENGTH_LONG).show();
                     drawerlayout.closeDrawers();
                     return true;
                 }
