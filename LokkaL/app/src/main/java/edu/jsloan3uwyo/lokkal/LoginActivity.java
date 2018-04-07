@@ -1,368 +1,379 @@
 package edu.jsloan3uwyo.lokkal;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
+
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
-
-import android.os.Build;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.view.KeyEvent;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.view.ViewDebug;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity {
 
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
-    // UI references.
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
+    URI uri;
+    ArrayList<Person> list = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
-
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 //TODO: Replace back to not assuming access to location sharing activity
                 showMap(); //for now we will just assume access is granted
                 //attemptLogin();
             }
         });
-
-        Button mEmailRegisterButton = (Button) findViewById(R.id.email_register_button);
+        try {
+            uri = new URI("http://www.cs.uwyo.edu/~kfenster/query.php");
+            Log.v("SERVER", "Accessed query.php");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        Button mEmailRegisterButton = (Button) findViewById(R.id.register_button);
         mEmailRegisterButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                //Layout inflater for displaying the register screen in the Alert Dialog
+                LayoutInflater li = LayoutInflater.from(view.getContext());
+                View promptsView = li.inflate(R.layout.register_screen, null);
+                //Settings for the Alert Dialog
+                final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setTitle("Register New Account");
+                builder.setView(promptsView);
+                builder.setPositiveButton("Register",null);
+                builder.setNegativeButton(android.R.string.cancel, null);
+                builder.create();
+                //Having to create a new one so we can set the OnShowListener
+                final AlertDialog mAlertDialog = builder.create();
+                //Each TextView/DatePicker on the alert dialog page
+                final EditText firstName_tv = (EditText) promptsView.findViewById(R.id.regFirstName);
+                final EditText lastName_tv = (EditText) promptsView.findViewById(R.id.regLastName);
+                final DatePicker dateOfBirth_dp = (DatePicker) promptsView.findViewById(R.id.regDateOfBirth);
+                final EditText email_tv = (EditText) promptsView.findViewById(R.id.regEmail);
+                final EditText password_tv = (EditText) promptsView.findViewById(R.id.regEnterPassword);
+                final EditText cpassword_tv = (EditText) promptsView.findViewById(R.id.regConfirmPassword);
+                //Setting the max value of the date picker to today's date
+                dateOfBirth_dp.setMaxDate(new Date().getTime());
+                //OnShowListener prevents the Alert Dialog from closing if the Register button is clicked
+                mAlertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        Button b = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        b.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //Keeps track of whether a valid registration is occurring.
+                                boolean registerAccount = true;
+                                //Gets text from each input field
+                                String firstName = firstName_tv.getText().toString();
+                                String lastName = lastName_tv.getText().toString();
+                                String regEmail = email_tv.getText().toString();
+                                String regPassword = password_tv.getText().toString();
+                                String confirmPassword = cpassword_tv.getText().toString();
+                                String dateOfBirth = dateOfBirth_dp.toString();
+                                //Used for moving the focus back to a specific textview if it missing data
+                                View focusview = null;
+                                //Makes sure the FirstName textview has a value
+                                if(TextUtils.isEmpty(firstName))
+                                {
+                                    Toast.makeText(LoginActivity.this, "Need to enter a first name!", Toast.LENGTH_SHORT).show();
+                                    focusview = firstName_tv;
+                                    registerAccount = false;
+                                }
+                                //Makes sure the LastName textview has a value
+                                else if(TextUtils.isEmpty(lastName))
+                                {
+                                    Toast.makeText(LoginActivity.this, "Need to enter a last name!", Toast.LENGTH_SHORT).show();
+                                    focusview = lastName_tv;
+                                    registerAccount = false;
+                                }
+                                //Makes sure the RegEmail textview has a value and it contains a '@' sign.
+                                else if(TextUtils.isEmpty(regEmail) || !regEmail.contains("@"))
+                                {
+                                    Toast.makeText(LoginActivity.this, "Need to enter a valid email!", Toast.LENGTH_SHORT).show();
+                                    focusview = email_tv;
+                                    registerAccount = false;
+                                }
+                                //Makes sure the RegEnterPassword textview has a value and it's lenght is greater than 5
+                                else if(TextUtils.isEmpty(regPassword) || regPassword.length() <= 5)
+                                {
+                                    Toast.makeText(LoginActivity.this, "Need to enter a valid password!", Toast.LENGTH_SHORT).show();
+                                    focusview = password_tv;
+                                    registerAccount = false;
+                                }
+                                //Makes sure the RegConfirmPassword textview is not empty and that is matches the first password
+                                else if(TextUtils.isEmpty(confirmPassword) || !confirmPassword.equals(regPassword))
+                                {
+                                    Toast.makeText(LoginActivity.this, "Passwords needs to match!", Toast.LENGTH_SHORT).show();
+                                    focusview = cpassword_tv;
+                                    registerAccount = false;
+                                }
+                                //If no errors, create the account and dismiss the alert dialog
+                                if(registerAccount)
+                                {
+                                    /*
+                                            Send Account Information to database goes here
+                                     */
+                                    URI localuri = null;
+                                    myDataAsync myData;
+                                    try {
+                                        localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_registration.php");
+                                        boolean update = false;
+                                        Log.v("SERVER", "Accessed insert_registration.php");
+                                        new doRest().execute(new myDataAsync(localuri, update, -1, firstName, lastName, dateOfBirth,regEmail, regPassword));
+                                        Toast.makeText(LoginActivity.this, "Account has been registered!", Toast.LENGTH_SHORT).show();
+                                    } catch (URISyntaxException e) {
+                                        e.printStackTrace();
+                                    }
+                                    mAlertDialog.dismiss();
+                                }
+                                //Else, set the focus on the textview that had an error associated with it.
+                                else
+                                {
+                                    focusview.requestFocus();
+                                }
+                            }
+                        });
+                    }
+                });
+                mAlertDialog.show();
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-    }
-
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-    //TODO: FIX THE PERMISSIONS REQUESTS!!! (Think a larger scope of what all is needed initially)
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS,ACCESS_COARSE_LOCATION,ACCESS_FINE_LOCATION}, 1);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }
-
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-    private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
-        // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
-
-        // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
-        }
-    }
-
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
-    }
-
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
     }
 
     private void showMap() {
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
+
+    //Ward's Code
+    //help class to send all the data to the async task.  mostly because setting up all the
+    //post data is just a pain in the but now.
+    class myDataAsync {
+        URI uri;
+        boolean update;
+        String data;
+        private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                if (first)
+                    first = false;
+                else
+                    result.append("&");
+
+                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+            }
+
+            return result.toString();
+        }
+        //constructor to create the data structure.
+        myDataAsync(URI myuri, boolean update, int PID, String fn, String ln, String dob, String em, String p) {
+            this.update = update;
+            uri = myuri;
+            HashMap<String, String> hmap = new HashMap<String, String>();
+            hmap.put("PersonID", String.valueOf(PID));
+            hmap.put("FirstName", fn);
+            hmap.put("LastName", ln);
+            hmap.put("DateOfBirth", dob);
+            hmap.put("Email", em);
+            hmap.put("Password", p);
+            try {
+                data = getPostDataString(hmap);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    //simple method that is called by lots of different spots, to reload the query data.
+    public void doDataUpdate() {
+        //call the refresh code manually here.
+        list = new ArrayList<Person>();  //set the list.
+        new doNetwork().execute(uri);
+    }
+
+    /*
+    * uses an AsyncTask with a httpURLConnection method to query the REST service.
+    * The data is constructed in the progress method and in the post the data is added to the
+    * adapter for the recyclerview.
+    */
+    private class doNetwork extends AsyncTask<URI, String, String> {
+        /*
+         * while this could have been in the doInBackground, I reused the
+         * method already created the thread class.
+         *
+         * This downloads a text file and returns it to doInBackground.
+         */
+        //Simple class that takes an InputStream and return the data
+        //as a string, with line separators (ie end of line markers)
+        private String readStream(InputStream in) {
+            BufferedReader reader = null;
+            StringBuilder sb = new StringBuilder("");
+            String line = "";
+            String NL = System.getProperty("line.separator");
+            try {
+                reader = new BufferedReader(new InputStreamReader(in));
+                while ((line = reader.readLine()) != null) {
+                    publishProgress(line);  //create the data structure as we go.
+                    sb.append(line + NL);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return sb.toString();
+        }
+
+
+        @Override
+        protected String doInBackground(URI... params) {
+            String page = "";
+            try {
+                //URL url = new URL(params[0].toString()); //but next line is much better! convert directly.
+                URL url = params[0].toURL();
+
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                page = readStream(con.getInputStream());
+                con.disconnect();
+            } catch (Exception e) {
+                // publishProgress("Failed to retrieve web page ...\n");
+                publishProgress(e.getMessage());
+            }
+            return page;  //return the page downloaded.
+        }
+
+        /*
+         * build the data structure.
+         */
+        protected void onProgressUpdate(String... progress) {
+            //build the data structure as we go.
+            try {
+                String parts[] = progress[0].split(",");
+                list.add(new Person(Integer.valueOf(parts[0]), parts[1], parts[2], parts[3],parts[4],parts[5]));
+            } catch (Exception e) {
+                Log.v("donetwork", "Error line: " + progress[0]);
+            }
+        }
+
+        /*
+         * finished, new set the adapter with the data and turn off the refresh.
+         */
+        protected void onPostExecute(String result) {
+
+        }
+    }
+
+    /*
+     *this asynctask is passing parameters via post to the rest service.
+     * The post parameters are setup correctly in the dataAsync method that is
+     * passed to the task.  It then open the connection, passes the parameters, authenicates
+     * and toasts the return value.
+     */
+
+    private class doRest extends AsyncTask<myDataAsync, String, Integer> {
+
+        //how to write the parameters via a post method were used from here:
+        //http://stackoverflow.com/questions/29536233/deprecated-http-classes-android-lollipop-5-1
+
+        @Override
+        protected Integer doInBackground(myDataAsync... params) {
+            try {
+                //setup the url
+                URL url = params[0].uri.toURL();
+                Log.wtf("network", url.toString() );
+                //make the connection
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                //setup as post method and write out the parameters.
+                con.setRequestMethod("POST");
+                con.setDoInput(true);
+                con.setDoOutput(true);
+                OutputStream os = con.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(params[0].data);
+                writer.flush();
+                writer.close();
+                os.close();
+
+                //get the response code (ie success 200 or something else
+                int responseCode = con.getResponseCode();
+                Log.wtf("Response", String.valueOf(responseCode));
+                String response = "";
+                //the return is a single number, so simple to read like this:
+                //note the while loop should not be necessary, but just in case.
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        response += line;
+                    }
+                } else
+                    response = "0";
+
+                return Integer.valueOf(response);
+            } catch (Exception e) {
+                // failure of some kind.  uncomment the stacktrace to see what happened if it is
+                // permit error.
+                e.printStackTrace();
+                return 0;
+            }
+
+        }
+        protected void onPostExecute(Integer result) {
+            Toast.makeText(getApplicationContext(), "Result: " + result, Toast.LENGTH_LONG).show();
+            doDataUpdate();  //data has been added/removed, update the recyclerview.
+        }
+    }
+    //End Of Ward's Code
 }
 
