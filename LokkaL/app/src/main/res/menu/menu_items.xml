@@ -2,14 +2,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/group_management"
+        android:id="@+id/group_management"
+        android:checked="true"
+        android:icon="@mipmap/ic_group"
+        android:title="Group Management" />
+
+        <item
+            android:id="@+id/group_requests"
             android:checked="true"
             android:icon="@mipmap/ic_group"
-            android:title="Group Management" />
+            android:title="Group Requests" />
+
         <item
-            android:id="@+id/settings"
+            android:id="@+id/friends"
             android:checked="true"
             android:icon="@mipmap/ic_launcher"
-            android:title="Settings" />
+            android:title="Friends" />
+
+        <item
+            android:id="@+id/friend_requests"
+            android:checked="true"
+            android:icon="@mipmap/ic_launcher"
+            android:title="Friend Requests" />
     </group>
 </menu>
