@@ -5,8 +5,9 @@
 
   include 'lib.php';
 
-   $sql = 'SELECT PersonID, FirstName, LastName, DateOfBirth, Email, Password FROM PersonModule_Person WHERE Email ='.$Email
-     + ' AND Password = '.$Password;
+   $sql = "SELECT PersonID, FirstName, LastName, DateOfBirth, Email, Password 
+   		FROM PersonModule_Person 
+   		WHERE Email = '" . $Email . "' AND Password = '" . $Password . "'";
 
 $result = mysql_query($sql);
 while($ary = mysql_fetch_array($result)) {

@@ -11,6 +11,12 @@ public class Person {
     public String Email = "";
     public String Password = "";
     public int PersonID = -1;
+
+    //Empty Constructor
+    Person()
+    {
+    }
+
     Person(int i, String fn, String ln, String dob, String e, String p) {
         PersonID = i;
         FirstName = fn;
