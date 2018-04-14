@@ -163,7 +163,6 @@ public class LoginActivity extends AppCompatActivity {
                                     myDataAsync myData;
                                     try {
                                         localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_registration.php");
-                                        boolean update = false;
                                         Log.v("SERVER", "Accessed insert_registration.php");
                                         new doRest().execute(new myDataAsync(localuri, firstName, lastName, dateOfBirth,regEmail, regPassword));
                                         Toast.makeText(LoginActivity.this, "Account has been registered!", Toast.LENGTH_SHORT).show();
