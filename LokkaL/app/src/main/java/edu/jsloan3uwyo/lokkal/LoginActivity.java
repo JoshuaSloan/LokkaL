@@ -188,10 +188,7 @@ public class LoginActivity extends AppCompatActivity {
     private void showMap() {
         Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra("Person", (Serializable) acc);
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/master
         startActivity(intent);
     }
     //Ward's Code

@@ -8,7 +8,7 @@ include 'lib.php';
    	$sql = "INSERT INTO PersonModule_Friendship (LeftPersonID, RightPersonID, StartDate)
    	SELECT " . $LeftPersonID . ", p.PersonID, NOW()
    	FROM PersonModule_Person as p
-   	WHERE p.Email = '" . $Email . "'"
+   	WHERE p.Email = '" . $Email . "'";
 
    	//echo "$sql\n";
    	$result = mysql_query($sql);

@@ -82,11 +82,11 @@ public class AddFriendFragment extends Fragment {
                 if(!TextUtils.isEmpty(input.getText())) {
                     URI localuri = null;
                     sendToDatabase myData;
+                    String fre = input.getText().toString();
                     try {
                         localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_friendrequest.php");
                         Log.v("SERVER", "Accessed insert_friendrequest.php");
-                        new insertFR().execute(new sendToDatabase(localuri,acc.PersonID,input.getText().toString()));
-                        Toast.makeText(getActivity(), "Friend Request Sent", Toast.LENGTH_SHORT).show();
+                        new insertFR().execute(new sendToDatabase(localuri,acc.PersonID, fre));
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                     }
@@ -187,7 +187,7 @@ public class AddFriendFragment extends Fragment {
 
                 //get the response code (ie success 200 or something else
                 int responseCode = con.getResponseCode();
-                Log.wtf("Response", String.valueOf(responseCode));
+                Log.wtf("Response Code", String.valueOf(responseCode));
                 Log.wtf("Message", con.getResponseMessage());
                 String response = "";
                 //the return is a single number, so simple to read like this:
