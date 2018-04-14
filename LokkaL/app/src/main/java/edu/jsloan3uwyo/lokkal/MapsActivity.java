@@ -59,6 +59,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DrawerLayout drawerlayout;
     private NavigationView navView;
 
+    Person acc;
+
     Location mLastLocation; //TODO need to possibly make this local and pass it instead
     LatLng lastLocationCoordinates;
 
@@ -70,6 +72,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        acc = (Person) getIntent().getSerializableExtra("Person");
 
         /////////////////////////////////////////////////////////////////////////////////////////
 
