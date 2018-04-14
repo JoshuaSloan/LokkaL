@@ -327,6 +327,7 @@ public class LoginActivity extends AppCompatActivity {
         /*
          * build the data structure.
          */
+
         protected void onProgressUpdate(String... progress) {
             //build the data structure as we go.
             Log.wtf("Progress", progress[0]);

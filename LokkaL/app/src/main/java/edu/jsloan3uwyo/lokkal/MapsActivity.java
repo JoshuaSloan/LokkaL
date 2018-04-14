@@ -49,7 +49,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener {
+
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener {
 
 
     private GoogleMap mMap;
@@ -135,7 +136,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.friend_requests) {
-                    Toast.makeText(getApplicationContext(), "Friend Request Fragment", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), "Friend Request Fragment", Toast.LENGTH_LONG).show();
+                    Bundle args = new Bundle();
+                    args.putSerializable("Person",acc);
+                    FriendRequestFragment friendRequestFragment = new FriendRequestFragment();
+                    friendRequestFragment.setArguments(args);
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+                    transaction.addToBackStack(null);
+                    transaction.replace(R.id.map, friendRequestFragment);
+                    transaction.commit();
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.add_friend) {
@@ -313,4 +323,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     @Override
     public void onFragmentInteraction(Uri uri) {}
+
+
+    @Override
+    public void onListFragmentInteraction(FriendRequest fr) {
+
+    }
 }
