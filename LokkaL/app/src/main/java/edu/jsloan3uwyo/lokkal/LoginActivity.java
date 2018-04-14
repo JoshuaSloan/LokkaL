@@ -163,7 +163,6 @@ public class LoginActivity extends AppCompatActivity {
                                     myDataAsync myData;
                                     try {
                                         localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_registration.php");
-                                        boolean update = false;
                                         Log.v("SERVER", "Accessed insert_registration.php");
                                         new doRest().execute(new myDataAsync(localuri, firstName, lastName, dateOfBirth,regEmail, regPassword));
                                         Toast.makeText(LoginActivity.this, "Account has been registered!", Toast.LENGTH_SHORT).show();
@@ -189,6 +188,7 @@ public class LoginActivity extends AppCompatActivity {
     private void showMap() {
         Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra("Person", (Serializable) acc);
+
         startActivity(intent);
     }
     //Ward's Code
@@ -327,6 +327,7 @@ public class LoginActivity extends AppCompatActivity {
         /*
          * build the data structure.
          */
+
         protected void onProgressUpdate(String... progress) {
             //build the data structure as we go.
             Log.wtf("Progress", progress[0]);

@@ -1,18 +1,24 @@
 package edu.jsloan3uwyo.lokkal;
 
+import java.io.Serializable;
+
 /**
  * Created by Kolby on 3/26/18.
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Person implements Serializable{
+
     public String FirstName = "";
     public String LastName = "";
     public String DateOfBirth = "";
     public String Email = "";
     public String Password = "";
     public int PersonID = -1;
+    public List<FriendRequest> lofr; //List Of Friend Requests
 
     //Empty Constructor
     Person()
@@ -26,5 +32,6 @@ public class Person implements Serializable{
         DateOfBirth = dob;
         Email = e;
         Password = p;
+        lofr = new ArrayList<FriendRequest>();
     }
 }

@@ -48,20 +48,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener {
+
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener {
 
 
     private GoogleMap mMap;
@@ -91,7 +80,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         acc = (Person) getIntent().getSerializableExtra("Person");
 
-        /////////////////////////////////////////////////////////////////////////////////////////
+        //Toast.makeText(getApplicationContext(),acc.FirstName + " " +acc.LastName, Toast.LENGTH_LONG).show();
 
         //create the main toolbar
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -147,12 +136,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.friend_requests) {
-                    Toast.makeText(getApplicationContext(), "Friend Request Fragment", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), "Friend Request Fragment", Toast.LENGTH_LONG).show();
+                    Bundle args = new Bundle();
+                    args.putSerializable("Person",acc);
+                    FriendRequestFragment friendRequestFragment = new FriendRequestFragment();
+                    friendRequestFragment.setArguments(args);
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+                    transaction.addToBackStack(null);
+                    transaction.replace(R.id.map, friendRequestFragment);
+                    transaction.commit();
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.add_friend) {
                     //Toast.makeText(getApplicationContext(), "Add Friend Fragment", Toast.LENGTH_LONG).show();
+                    Bundle args = new Bundle();
+                    args.putSerializable("Person",acc);
                     AddFriendFragment addFriendFragment = new AddFriendFragment();
+                    addFriendFragment.setArguments(args);
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
                     transaction.addToBackStack(null);
@@ -320,105 +321,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMap.setMinZoomPreference(15);
     }
-
     @Override
     public void onFragmentInteraction(Uri uri) {}
-        class sendToDatabase {
-            URI uri;
-            String data;
 
-            private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
-                StringBuilder result = new StringBuilder();
-                boolean first = true;
-                for (Map.Entry<String, String> entry : params.entrySet()) {
-                    if (first)
-                        first = false;
-                    else
-                        result.append("&");
 
-                    result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-                    result.append("=");
-                    result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-                }
+    @Override
+    public void onListFragmentInteraction(FriendRequest fr) {
 
-                return result.toString();
-            }
-
-            //Insert Friend Request
-            sendToDatabase(URI myuri, int lpid, String em) {
-                uri = myuri;
-                HashMap<String, String> hmap = new HashMap<String, String>();
-                hmap.put("LeftPersonID", String.valueOf(lpid));
-                hmap.put("Email", em);
-                try {
-                    data = getPostDataString(hmap);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-
-        private class insertFR extends AsyncTask<LoginActivity.myDataAsync, String, String> {
-
-            //how to write the parameters via a post method were used from here:
-            //http://stackoverflow.com/questions/29536233/deprecated-http-classes-android-lollipop-5-1
-
-            @Override
-            protected String doInBackground(LoginActivity.myDataAsync... params) {
-                try {
-                    //setup the url
-                    URL url = params[0].uri.toURL();
-                    Log.wtf("network", url.toString());
-                    //make the connection
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    //setup as post method and write out the parameters.
-                    con.setRequestMethod("POST");
-                    con.setDoInput(true);
-                    con.setDoOutput(true);
-                    OutputStream os = con.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(
-                            new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(params[0].data);
-                    writer.flush();
-                    writer.close();
-                    os.close();
-
-                    //get the response code (ie success 200 or something else
-                    int responseCode = con.getResponseCode();
-                    Log.wtf("Response", String.valueOf(responseCode));
-                    String response = "";
-                    //the return is a single number, so simple to read like this:
-                    //note the while loop should not be necessary, but just in case.
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        String line;
-                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                        while ((line = br.readLine()) != null) {
-                            Log.wtf("LINE", line);
-                            response += line;
-
-                        }
-                        if (response == "") {
-                            Log.wtf("QUERY", "Line was empty");
-                            response = "0";
-                        }
-                    } else
-                        response = "0";
-                    Log.wtf("RESPONSE", response);
-                    onProgressUpdate(response);
-                    return response;
-                } catch (Exception e) {
-                    // failure of some kind.  uncomment the stacktrace to see what happened if it is
-                    // permit error.
-                    e.printStackTrace();
-                    return "0";
-                }
-
-            }
-
-            protected void onPostExecute(String result) {
-                //Calls this at the end of the Async Task
-                Toast.makeText(MapsActivity.this, "Friend Request Sent", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
+}
