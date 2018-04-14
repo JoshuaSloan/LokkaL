@@ -121,15 +121,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     drawerlayout.closeDrawers();
                     return true;
                 }
+                else if (id == R.id.create_group)
+                {
+                    Toast.makeText(getApplicationContext(), "Create New Group Fragment", Toast.LENGTH_LONG).show();
+                    drawerlayout.closeDrawers();
+                    return true;
+                }
                 else if (id == R.id.friends)
                 {
-                    Toast.makeText(getApplicationContext(), "Go to group requests", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Friends Fragment", Toast.LENGTH_LONG).show();
                     drawerlayout.closeDrawers();
                     return true;
                 }
                 else if (id == R.id.friend_requests)
                 {
-                    Toast.makeText(getApplicationContext(), "Go to group requests", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Friend Request Fragment", Toast.LENGTH_LONG).show();
+                    drawerlayout.closeDrawers();
+                    return true;
+                }
+                else if (id == R.id.add_friend)
+                {
+                    Toast.makeText(getApplicationContext(), "Add Friend Fragment", Toast.LENGTH_LONG).show();
                     drawerlayout.closeDrawers();
                     return true;
                 }
@@ -220,8 +232,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_items, menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    //drop down items in the action bar, only settings currently, but more can easily be added (ReadMe?)
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            // Display the fragment as the main content.
+            /*getFragmentManager().beginTransaction()
+                    .replace(android.R.id.content, new SettingsFragment())
+                    .addToBackStack("settings")
+                    .commit();
+                    */
+            Toast.makeText(getApplicationContext(), "Go to settings fragment", Toast.LENGTH_LONG).show();
+            return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
