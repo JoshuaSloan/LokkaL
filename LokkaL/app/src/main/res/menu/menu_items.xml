@@ -1,28 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
+
         <item
         android:id="@+id/group_management"
         android:checked="true"
-        android:icon="@mipmap/ic_group"
+            android:icon="@mipmap/ic_group_round"
         android:title="Group Management" />
 
         <item
             android:id="@+id/group_requests"
             android:checked="true"
-            android:icon="@mipmap/ic_group"
+            android:icon="@mipmap/ic_group_round"
             android:title="Group Requests" />
+
+        <item
+            android:id="@+id/create_group"
+            android:checked="true"
+            android:icon="@mipmap/ic_group_round"
+            android:title="Create New Group" />
 
         <item
             android:id="@+id/friends"
             android:checked="true"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ic_group_round"
             android:title="Friends" />
 
         <item
             android:id="@+id/friend_requests"
             android:checked="true"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ic_group_round"
             android:title="Friend Requests" />
+
+        <item
+            android:id="@+id/add_friend"
+            android:checked="true"
+            android:icon="@mipmap/ic_group_round"
+            android:title="Add New Friend" />
     </group>
 </menu>
