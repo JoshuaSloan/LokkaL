@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.Uri;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -46,7 +48,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -145,7 +147,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 else if (id == R.id.add_friend)
                 {
-                    Toast.makeText(getApplicationContext(), "Add Friend Fragment", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), "Add Friend Fragment", Toast.LENGTH_LONG).show();
+                    AddFriendFragment addFriendFragment = new AddFriendFragment();
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+                    transaction.addToBackStack(null);
+                    transaction.replace(R.id.map, addFriendFragment);
+                    transaction.commit();
+
                     drawerlayout.closeDrawers();
                     return true;
                 }
@@ -309,4 +318,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMinZoomPreference(15);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }
