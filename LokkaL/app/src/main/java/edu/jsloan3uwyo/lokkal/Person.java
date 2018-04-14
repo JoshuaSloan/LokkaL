@@ -4,7 +4,9 @@ package edu.jsloan3uwyo.lokkal;
  * Created by Kolby on 3/26/18.
  */
 
-public class Person {
+import java.io.Serializable;
+
+public class Person implements Serializable{
     public String FirstName = "";
     public String LastName = "";
     public String DateOfBirth = "";
