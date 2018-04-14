@@ -1,12 +1,18 @@
 package edu.jsloan3uwyo.lokkal;
 
+import java.io.Serializable;
+
 /**
  * Created by Kolby on 3/26/18.
  */
 
+<<<<<<< HEAD
 import java.io.Serializable;
 
 public class Person implements Serializable{
+=======
+public class Person implements Serializable {
+>>>>>>> origin/master
     public String FirstName = "";
     public String LastName = "";
     public String DateOfBirth = "";

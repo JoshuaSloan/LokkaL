@@ -79,6 +79,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         acc = (Person) getIntent().getSerializableExtra("Person");
 
+<<<<<<< HEAD
+=======
+        //Toast.makeText(getApplicationContext(),acc.FirstName + " " +acc.LastName, Toast.LENGTH_LONG).show();
+>>>>>>> origin/master
         /////////////////////////////////////////////////////////////////////////////////////////
 
         //create the main toolbar
