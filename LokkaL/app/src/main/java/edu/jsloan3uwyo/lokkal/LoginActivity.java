@@ -46,28 +46,33 @@ public class LoginActivity extends AppCompatActivity {
 
     URI uri;
     ArrayList<Person> list = null;
+    EditText email;
+    EditText pass;
+    Person acc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        acc = new Person();
+        email = (EditText) findViewById(R.id.email);
+        pass = (EditText) findViewById(R.id.password);
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 //TODO: Replace back to not assuming access to location sharing activity
-                showMap(); //for now we will just assume access is granted
-                //attemptLogin();
+                try {
+                    uri = new URI("http://www.cs.uwyo.edu/~kfenster/query_signin.php");
+                    Log.v("PARAMS", email.getText().toString() + pass.getText().toString());
+                    //Queries the database for a person record with the email/passsword.
+                    new doRest().execute(new myDataAsync(uri,email.getText().toString(), pass.getText().toString()));
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
             }
         });
-        try {
-            uri = new URI("http://www.cs.uwyo.edu/~kfenster/query.php");
-            Log.v("SERVER", "Accessed query.php");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
         Button mEmailRegisterButton = (Button) findViewById(R.id.register_button);
         mEmailRegisterButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -109,7 +114,7 @@ public class LoginActivity extends AppCompatActivity {
                                 String regEmail = email_tv.getText().toString();
                                 String regPassword = password_tv.getText().toString();
                                 String confirmPassword = cpassword_tv.getText().toString();
-                                String dateOfBirth = dateOfBirth_dp.toString();
+                                String dateOfBirth = String.valueOf(dateOfBirth_dp.getYear()) + '-' + String.valueOf(dateOfBirth_dp.getMonth() + 1) + '-' + String.valueOf(dateOfBirth_dp.getDayOfMonth());
                                 //Used for moving the focus back to a specific textview if it missing data
                                 View focusview = null;
                                 //Makes sure the FirstName textview has a value
@@ -159,7 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                                         localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_registration.php");
                                         boolean update = false;
                                         Log.v("SERVER", "Accessed insert_registration.php");
-                                        new doRest().execute(new myDataAsync(localuri, update, -1, firstName, lastName, dateOfBirth,regEmail, regPassword));
+                                        new doRest().execute(new myDataAsync(localuri, firstName, lastName, dateOfBirth,regEmail, regPassword));
                                         Toast.makeText(LoginActivity.this, "Account has been registered!", Toast.LENGTH_SHORT).show();
                                     } catch (URISyntaxException e) {
                                         e.printStackTrace();
@@ -180,15 +185,14 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
-
     private void showMap() {
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
-
     //Ward's Code
     //help class to send all the data to the async task.  mostly because setting up all the
     //post data is just a pain in the but now.
+    //This is what we pass parameters to for the account registration and checking for sign in
     class myDataAsync {
         URI uri;
         boolean update;
@@ -210,11 +214,10 @@ public class LoginActivity extends AppCompatActivity {
             return result.toString();
         }
         //constructor to create the data structure.
-        myDataAsync(URI myuri, boolean update, int PID, String fn, String ln, String dob, String em, String p) {
-            this.update = update;
+        //Account Registration Constructor
+        myDataAsync(URI myuri, String fn, String ln, String dob, String em, String p) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
-            hmap.put("PersonID", String.valueOf(PID));
             hmap.put("FirstName", fn);
             hmap.put("LastName", ln);
             hmap.put("DateOfBirth", dob);
@@ -227,106 +230,48 @@ public class LoginActivity extends AppCompatActivity {
             }
 
         }
-    }
-    //simple method that is called by lots of different spots, to reload the query data.
-    public void doDataUpdate() {
-        //call the refresh code manually here.
-        list = new ArrayList<Person>();  //set the list.
-        new doNetwork().execute(uri);
-    }
-
-    /*
-    * uses an AsyncTask with a httpURLConnection method to query the REST service.
-    * The data is constructed in the progress method and in the post the data is added to the
-    * adapter for the recyclerview.
-    */
-    private class doNetwork extends AsyncTask<URI, String, String> {
-        /*
-         * while this could have been in the doInBackground, I reused the
-         * method already created the thread class.
-         *
-         * This downloads a text file and returns it to doInBackground.
-         */
-        //Simple class that takes an InputStream and return the data
-        //as a string, with line separators (ie end of line markers)
-        private String readStream(InputStream in) {
-            BufferedReader reader = null;
-            StringBuilder sb = new StringBuilder("");
-            String line = "";
-            String NL = System.getProperty("line.separator");
+        //Sign-In Constructor
+        myDataAsync(URI myuri, String em, String p) {
+            this.update = update;
+            uri = myuri;
+            HashMap<String, String> hmap = new HashMap<String, String>();
+            hmap.put("Email", em);
+            hmap.put("Password", p);
             try {
-                reader = new BufferedReader(new InputStreamReader(in));
-                while ((line = reader.readLine()) != null) {
-                    publishProgress(line);  //create the data structure as we go.
-                    sb.append(line + NL);
-                }
-            } catch (IOException e) {
+                data = getPostDataString(hmap);
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
-            return sb.toString();
-        }
-
-
-        @Override
-        protected String doInBackground(URI... params) {
-            String page = "";
-            try {
-                //URL url = new URL(params[0].toString()); //but next line is much better! convert directly.
-                URL url = params[0].toURL();
-
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                page = readStream(con.getInputStream());
-                con.disconnect();
-            } catch (Exception e) {
-                // publishProgress("Failed to retrieve web page ...\n");
-                publishProgress(e.getMessage());
-            }
-            return page;  //return the page downloaded.
-        }
-
-        /*
-         * build the data structure.
-         */
-        protected void onProgressUpdate(String... progress) {
-            //build the data structure as we go.
-            try {
-                String parts[] = progress[0].split(",");
-                list.add(new Person(Integer.valueOf(parts[0]), parts[1], parts[2], parts[3],parts[4],parts[5]));
-            } catch (Exception e) {
-                Log.v("donetwork", "Error line: " + progress[0]);
-            }
-        }
-
-        /*
-         * finished, new set the adapter with the data and turn off the refresh.
-         */
-        protected void onPostExecute(String result) {
 
         }
     }
-
+    //Checks to see if they query returned anything
+    public void doDataUpdate() {
+        //Record was found!
+        if(acc.PersonID != -1)
+        {
+            showMap();
+        }
+        //Else Email/Password was not valid
+        else
+        {
+            Toast.makeText(this, "Invalid Email/Password!", Toast.LENGTH_SHORT).show();
+        }
+    }
     /*
      *this asynctask is passing parameters via post to the rest service.
      * The post parameters are setup correctly in the dataAsync method that is
      * passed to the task.  It then open the connection, passes the parameters, authenicates
      * and toasts the return value.
      */
-
-    private class doRest extends AsyncTask<myDataAsync, String, Integer> {
+    //Code For Receiving Data From Query
+    private class doRest extends AsyncTask<myDataAsync, String, String> {
 
         //how to write the parameters via a post method were used from here:
         //http://stackoverflow.com/questions/29536233/deprecated-http-classes-android-lollipop-5-1
 
         @Override
-        protected Integer doInBackground(myDataAsync... params) {
+        protected String doInBackground(myDataAsync... params) {
             try {
                 //setup the url
                 URL url = params[0].uri.toURL();
@@ -355,22 +300,46 @@ public class LoginActivity extends AppCompatActivity {
                     String line;
                     BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     while ((line = br.readLine()) != null) {
+                        Log.wtf("LINE", line);
                         response += line;
+
+                    }
+                    if(response == "")
+                    {
+                        Log.wtf("QUERY", "Line was empty?");
+                        response = "0";
                     }
                 } else
                     response = "0";
-
-                return Integer.valueOf(response);
+                Log.wtf("RESPONSE", response);
+                onProgressUpdate(response);
+                return response;
             } catch (Exception e) {
                 // failure of some kind.  uncomment the stacktrace to see what happened if it is
                 // permit error.
                 e.printStackTrace();
-                return 0;
+                return "0";
             }
 
         }
-        protected void onPostExecute(Integer result) {
-            Toast.makeText(getApplicationContext(), "Result: " + result, Toast.LENGTH_LONG).show();
+        /*
+         * build the data structure.
+         */
+        protected void onProgressUpdate(String... progress) {
+            //build the data structure as we go.
+            Log.wtf("Progress", progress[0]);
+            try {
+                //Splits results by CSV values
+                String parts[] = progress[0].split(",");
+                Log.wtf("PersonID", parts[0]);
+                //Sets the acc varaible to be the information returned by the query
+                acc = new Person(Integer.valueOf(parts[0]), parts[1], parts[2], parts[3],parts[4],parts[5]);
+            } catch (Exception e) {
+                Log.v("donetwork", "Error line: " + progress[0]);
+            }
+        }
+        protected void onPostExecute(String result) {
+            //Calls this at the end of the Async Task
             doDataUpdate();  //data has been added/removed, update the recyclerview.
         }
     }
