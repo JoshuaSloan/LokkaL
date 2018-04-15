@@ -1,12 +1,12 @@
 <?php
 
-$FriendshipID = addslashes($_REQUEST['FriendshipID']);
-$Accepted = addslashes($_REQUEST['Accepted']);
+$FriendshipID = $_REQUEST['FriendshipID'];
+$ResponseTypeID = $_REQUEST['ResponseTypeID'];
 
 include 'lib.php';
 
 
-$sql = "UPDATE PersonModule_Friendship SET Accepted = " . $Accepted . " WHERE FriendshipID = " . $FriendshipID;
+$sql = "UPDATE PersonModule_Friendship SET ResponseTypeID = " . $ResponseTypeID . " WHERE FriendshipID = " . $FriendshipID;
 
 //   echo "$sql\n";
    $result = mysql_query($sql);
