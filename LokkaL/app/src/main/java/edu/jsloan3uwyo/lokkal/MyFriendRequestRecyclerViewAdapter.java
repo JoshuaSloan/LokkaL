@@ -30,7 +30,7 @@ public class MyFriendRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyF
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(String.valueOf(mValues.get(position).FriendshipID));
+        holder.mIdView.setText("From:");
         holder.mContentView.setText(mValues.get(position).PersonName);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {

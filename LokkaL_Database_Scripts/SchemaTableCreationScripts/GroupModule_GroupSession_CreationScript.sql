@@ -19,7 +19,7 @@ CREATE TABLE GroupModule_GroupMembers
 	, StartTime datetime NOT NULL
 	, EndTime datetime NULL
 	, ColorID INT NULL
-	, Accepted BIT NULL
+	, ResponseTypeID INT NOT NULL
 	, Active BIT NULL
 	, CONSTRAINT PK_GroupMember_GroupMemberID PRIMARY KEY (GroupMemberID)
     , CONSTRAINT FK_GroupMember_PersonID FOREIGN KEY (PersonID)
@@ -28,6 +28,8 @@ CREATE TABLE GroupModule_GroupMembers
 	REFERENCES GroupModule_GroupSession (GroupID)
 	, CONSTRAINT FK_Color_ColorID FOREIGN KEY (ColorID)
 	REFERENCES ColorModule_Color (ColorID)
+	, CONSTRAINT FK_GRequest_ResponseTypeID FOREIGN KEY (ResponseTypeID)
+	REFERENCES Request_ResponseType (ResponseTypeID)
 );
 
 
@@ -65,5 +67,9 @@ CREATE TABLE GroupModule_GroupNotification
 --SELECT * FROM GroupModule_GroupMembers;
 --SELECT * FROM GroupModule_GroupMemberLocation;
 --SELECT * FROM GroupModule_GroupNotification;
+--DROP TABLE GroupModule_GroupNotification;
+--DROP TABLE GroupModule_GroupMemberLocation;
+--DROP TABLE GroupModule_GroupMembers;
+--DROP TABLE GroupModule_GroupSession;
 
 

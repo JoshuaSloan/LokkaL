@@ -12,10 +12,12 @@ INNER JOIN PersonModule_Person as rp
 ON rp.PersonID = f.RightPersonID 
 INNER JOIN PersonModule_Person as lp 
 ON lp.PersonID = f.LeftPersonID 
+INNER JOIN Request_ResponseType as rt
+ON rt.ResponseTypeID = f.ResponseTypeID
 WHERE IFNULL(f.Active,1) <> 0 
 AND IFNULL(rp.Active,1) <> 0
 AND IFNULL(lp.Active,1) <> 0 
-AND f.Accepted IS NULL 
+AND rt.Name = 'Pending'
 AND f.RightPersonID = " . $PersonID;
 
 $result = mysql_query($sql);

@@ -17,13 +17,15 @@ CREATE TABLE PersonModule_Friendship
 	, RightPersonID INT NOT NULL
 	, StartDate datetime NOT NULL
 	, EndDate datetime NULL
-	, Accepted BIT NULL
+	, ResponseTypeID INT NOT NULL
 	, Active BIT NULL
 	, CONSTRAINT PK_Friendship_FriendshipID PRIMARY KEY CLUSTERED (FriendshipID)
 	, CONSTRAINT FK_Person_LeftPersonID FOREIGN KEY (LeftPersonID)
 	REFERENCES PersonModule_Person (PersonID)
 	, CONSTRAINT FK_Person_RightPersonID FOREIGN KEY (RightPersonID)
 	REFERENCES PersonModule_Person (PersonID)
+	, CONSTRAINT FK_FRequest_ResponseTypeID FOREIGN KEY (ResponseTypeID)
+	REFERENCES Request_ResponseType (ResponseTypeID)
 );
 --SELECT * FROM PersonModule_Person;
 --SELECT * FROM PersonModule_Friendship;
