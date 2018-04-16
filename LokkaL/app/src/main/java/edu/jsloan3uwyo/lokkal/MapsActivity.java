@@ -3,6 +3,8 @@ package edu.jsloan3uwyo.lokkal;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
@@ -16,6 +18,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -94,7 +97,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //create the drawer
         drawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
+        //TODO: Remove the shadow from the last selected item in navigation drawer
+        //drawerlayout.setScrimColor(Color.TRANSPARENT);
+        //drawerlayout.setScrimColor(getResources().getColor(android.R.color.transparent));
         drawerToggle = new ActionBarDrawerToggle(this, drawerlayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
 
             @Override
@@ -240,6 +245,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
                 });
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     @SuppressLint("MissingPermission")
