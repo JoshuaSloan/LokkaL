@@ -37,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#0a718a"
+        android:background="#FFFFFF"
         app:menu="@menu/menu_items"/>
 
 </android.support.v4.widget.DrawerLayout>

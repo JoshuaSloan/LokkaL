@@ -5,37 +5,37 @@
         <item
         android:id="@+id/group_management"
         android:checked="true"
-            android:icon="@mipmap/ic_group_round"
+            android:icon="@drawable/ic_group_black_24dp"
         android:title="Group Management" />
 
         <item
             android:id="@+id/group_requests"
             android:checked="true"
-            android:icon="@mipmap/ic_group_round"
+            android:icon="@drawable/ic_person_add_black_24dp"
             android:title="Group Requests" />
 
         <item
             android:id="@+id/create_group"
             android:checked="true"
-            android:icon="@mipmap/ic_group_round"
+            android:icon="@drawable/ic_group_add_black_24dp"
             android:title="Create New Group" />
 
         <item
             android:id="@+id/friends"
             android:checked="true"
-            android:icon="@mipmap/ic_group_round"
+            android:icon="@drawable/ic_sentiment_satisfied_black_24dp"
             android:title="Friends" />
 
         <item
             android:id="@+id/friend_requests"
             android:checked="true"
-            android:icon="@mipmap/ic_group_round"
+            android:icon="@drawable/ic_inbox_black_24dp"
             android:title="Friend Requests" />
 
         <item
             android:id="@+id/add_friend"
             android:checked="true"
-            android:icon="@mipmap/ic_group_round"
+            android:icon="@drawable/ic_send_black_24dp"
             android:title="Add New Friend" />
     </group>
 </menu>
