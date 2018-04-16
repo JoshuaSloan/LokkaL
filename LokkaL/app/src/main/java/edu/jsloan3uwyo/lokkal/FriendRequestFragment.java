@@ -168,6 +168,7 @@ public class FriendRequestFragment extends Fragment {
                         //The Async Thread notifies the adapater the dataset has been changed once done,
                         //So we don't need to notify the adapter here.
                         acc.lofr.remove(position);
+                        Toast.makeText(getActivity(), "Friend Request Accepted!", Toast.LENGTH_SHORT).show();
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                     }
@@ -292,9 +293,12 @@ public class FriendRequestFragment extends Fragment {
                     BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     while ((line = br.readLine()) != null) {
                         Log.wtf("LINE", line);
+                        if(line.compareTo("") != 0)
+                        {
+                            los.add(line);
+                            Log.v("LOS", String.valueOf(los.size()));
+                        }
 
-                        los.add(line);
-                        Log.v("LOS", String.valueOf(los.size()));
                     }
 
                 }
@@ -315,7 +319,7 @@ public class FriendRequestFragment extends Fragment {
             try {
                 Log.v("Progress", String.valueOf(progress.size()));
                 //Splits results by CSV values
-                for(int i =0; i < progress.size()-2; i++)
+                for(int i =0; i < progress.size(); i++)
                 {
                     String parts[] = progress.get(i).split(",");
                     acc.lofr.add(new FriendRequest(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), parts[2]));
