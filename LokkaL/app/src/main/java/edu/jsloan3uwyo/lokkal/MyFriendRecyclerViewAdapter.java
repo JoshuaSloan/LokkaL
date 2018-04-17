@@ -6,16 +6,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import edu.jsloan3uwyo.lokkal.FriendRequestFragment.OnListFragmentInteractionListener;
+import edu.jsloan3uwyo.lokkal.FriendFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
-public class MyFriendRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyFriendRequestRecyclerViewAdapter.ViewHolder> {
 
-    private final List<FriendRequest> mValues;
+public class MyFriendRecyclerViewAdapter extends RecyclerView.Adapter<MyFriendRecyclerViewAdapter.ViewHolder> {
+
+    private final List<Friend> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyFriendRequestRecyclerViewAdapter(List<FriendRequest> items, OnListFragmentInteractionListener listener) {
+    public MyFriendRecyclerViewAdapter(List<Friend> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -23,7 +24,7 @@ public class MyFriendRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyF
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_friendrequest, parent, false);
+                .inflate(R.layout.fragment_friend, parent, false);
         return new ViewHolder(view);
     }
 
@@ -54,13 +55,13 @@ public class MyFriendRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyF
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public FriendRequest mItem;
+        public Friend mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.frid);
-            mContentView = (TextView) view.findViewById(R.id.frname);
+            mIdView = (TextView) view.findViewById(R.id.fid);
+            mContentView = (TextView) view.findViewById(R.id.fname);
         }
 
         @Override

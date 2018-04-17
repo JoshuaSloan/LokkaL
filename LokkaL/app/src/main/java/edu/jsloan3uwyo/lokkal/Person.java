@@ -19,6 +19,7 @@ public class Person implements Serializable{
     public String Password = "";
     public int PersonID = -1;
     public List<FriendRequest> lofr; //List Of Friend Requests
+    public List<Friend> lof; //List Of Friends
 
     //Empty Constructor
     Person()
@@ -33,5 +34,6 @@ public class Person implements Serializable{
         Email = e;
         Password = p;
         lofr = new ArrayList<FriendRequest>();
+        lof = new ArrayList<Friend>();
     }
 }

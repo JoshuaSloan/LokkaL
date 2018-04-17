@@ -53,9 +53,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
-SettingsFragment.OnFragmentInteractionListener{
-
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener, FriendFragment.OnListFragmentInteractionListener {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -138,7 +136,15 @@ SettingsFragment.OnFragmentInteractionListener{
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.friends) {
-                    Toast.makeText(getApplicationContext(), "Friends Fragment", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), "Friends Fragment", Toast.LENGTH_LONG).show();
+                    Bundle args = new Bundle();
+                    args.putSerializable("Person",acc);
+                    FriendFragment friendFragment = new FriendFragment();
+                    friendFragment.setArguments(args);
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.addToBackStack(null);
+                    transaction.replace(R.id.map, friendFragment);
+                    transaction.commit();
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.friend_requests) {
@@ -345,6 +351,11 @@ SettingsFragment.OnFragmentInteractionListener{
 
     @Override
     public void onListFragmentInteraction(FriendRequest fr) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(Friend f) {
 
     }
 }
