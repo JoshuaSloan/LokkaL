@@ -1,7 +1,6 @@
 package edu.jsloan3uwyo.lokkal;
 
 import android.app.AlertDialog;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -11,14 +10,11 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -42,7 +38,7 @@ import java.util.Map;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class FriendRequestFragment extends Fragment {
+public class FriendFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -56,13 +52,13 @@ public class FriendRequestFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FriendRequestFragment() {
+    public FriendFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static FriendRequestFragment newInstance(int columnCount) {
-        FriendRequestFragment fragment = new FriendRequestFragment();
+    public static FriendFragment newInstance(int columnCount) {
+        FriendFragment fragment = new FriendFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -82,7 +78,7 @@ public class FriendRequestFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_friendrequest_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -93,22 +89,21 @@ public class FriendRequestFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyFriendRequestRecyclerViewAdapter(acc.lofr, mListener));
+            recyclerView.setAdapter(new MyFriendRecyclerViewAdapter(acc.lof, mListener));
         }
         return view;
     }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         //Empty the list because we requery it.
-        acc.lofr.clear();
+        acc.lof.clear();
         URI localuri = null;
-        FriendRequestFragment myData;
-        //Return Friend Requests
+        FriendFragment myData;
+        //Return Friends
         try {
-            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_friendrequests.php");
-            new FriendRequestFragment.pullFR().execute(new FriendRequestFragment.sendToDatabase(localuri,acc.PersonID));
+            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_friends.php");
+            new FriendFragment.pullF().execute(new FriendFragment.sendToDatabase(localuri,acc.PersonID));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -125,23 +120,22 @@ public class FriendRequestFragment extends Fragment {
                 final int position = viewHolder.getAdapterPosition();
                 FriendRequestFragment myData;
                 //Declining Friend Request
-                if(direction == ItemTouchHelper.LEFT)
-                {
+                if(direction == ItemTouchHelper.LEFT) {
                     Log.v("SWIPE:", "Swiping Left");
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("Delete Friend Request From " + acc.lofr.get(position).PersonName + "?");
+                    builder.setMessage("Delete Friend: " + acc.lof.get(position).PersonName + "?");
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             //Remove Item From Recycler View
                             URI localuri = null;
                             try {
-                                localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_friendrequest.php");
-                                new FriendRequestFragment.respondFR().execute(new FriendRequestFragment.sendToDatabase(localuri,acc.lofr.get(position).FriendshipID, 3));
-                                //Removing friend request from list
+                                localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_friend.php");
+                                new FriendFragment.deleteF().execute(new FriendFragment.sendToDatabase(localuri, acc.lof.get(position).FriendshipID, 3));
+                                //Removing friend from list
                                 //The Async Thread notifies the adapater the dataset has been changed once done,
                                 //So we don't need to notify the adapter here.
-                                acc.lofr.remove(position);
+                                acc.lof.remove(position);
                             } catch (URISyntaxException e) {
                                 e.printStackTrace();
                             }
@@ -155,23 +149,6 @@ public class FriendRequestFragment extends Fragment {
                         }
                     });
                     builder.show();
-                }
-                //Accepting Friend Request
-                else if(direction == ItemTouchHelper.RIGHT)
-                {
-                    Log.v("SWIPE:", "Swiping Right");
-                    URI localuri = null;
-                    try {
-                        localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_friendrequest.php");
-                        new FriendRequestFragment.respondFR().execute(new FriendRequestFragment.sendToDatabase(localuri,acc.lofr.get(position).FriendshipID, 2));
-                        //Removing friend request from list
-                        //The Async Thread notifies the adapater the dataset has been changed once done,
-                        //So we don't need to notify the adapter here.
-                        acc.lofr.remove(position);
-                        Toast.makeText(getActivity(), "Friend Request Accepted!", Toast.LENGTH_SHORT).show();
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         };
@@ -210,7 +187,7 @@ public class FriendRequestFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(FriendRequest fr);
+        void onListFragmentInteraction(Friend f);
     }
 
     class sendToDatabase {
@@ -260,9 +237,9 @@ public class FriendRequestFragment extends Fragment {
         }
     }
 
-    private class pullFR extends AsyncTask<sendToDatabase, String, List<String>> {
+    private class pullF extends AsyncTask<FriendFragment.sendToDatabase, String, List<String>> {
         @Override
-        protected List<String> doInBackground(sendToDatabase... params) {
+        protected List<String> doInBackground(FriendFragment.sendToDatabase... params) {
             try {
                 //setup the url
                 URL url = params[0].uri.toURL();
@@ -313,7 +290,6 @@ public class FriendRequestFragment extends Fragment {
             }
 
         }
-
         protected void onProgressUpdate(List<String> progress) {
             //build the data structure as we go.
             try {
@@ -322,7 +298,7 @@ public class FriendRequestFragment extends Fragment {
                 for(int i =0; i < progress.size(); i++)
                 {
                     String parts[] = progress.get(i).split(",");
-                    acc.lofr.add(new FriendRequest(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), parts[2]));
+                    acc.lof.add(new Friend(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), parts[2]));
                     Log.v("OPU", parts[0] + parts[1] + parts[2]);
                 }
 
@@ -336,10 +312,10 @@ public class FriendRequestFragment extends Fragment {
             doDataUpdate();  //data has been added/removed, update the recyclerview.
         }
     }
-    //I think we have to create a different class to handle responding to the friend request.
-    private class respondFR extends AsyncTask<sendToDatabase, String, String> {
+
+    private class deleteF extends AsyncTask<FriendFragment.sendToDatabase, String, String> {
         @Override
-        protected String doInBackground(sendToDatabase... params) {
+        protected String doInBackground(FriendFragment.sendToDatabase... params) {
             try {
                 //setup the url
                 URL url = params[0].uri.toURL();
@@ -385,8 +361,8 @@ public class FriendRequestFragment extends Fragment {
             doDataUpdate();  //data has been added/removed, update the recyclerview.
         }
     }
+
     public void doDataUpdate() {
         recyclerView.getAdapter().notifyDataSetChanged();
     }
-
 }
