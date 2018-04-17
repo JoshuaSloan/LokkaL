@@ -3,9 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_settings"
-        android:checked="true"
-        android:icon="@mipmap/ic_group_round"
+        android:icon="@drawable/ic_settings_black_24dp"
         android:title="Settings"
-        android:orderInCategory="100"
-        app:showAsAction="never"/>
+        android:checked="true" />
 </menu>
