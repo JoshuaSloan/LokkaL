@@ -53,7 +53,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener, FriendFragment.OnListFragmentInteractionListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
+        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener{
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;

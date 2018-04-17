@@ -31,7 +31,7 @@ public class MyFriendRecyclerViewAdapter extends RecyclerView.Adapter<MyFriendRe
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText("From:");
+        holder.mIdView.setText(""); //start with blank string so friends list does not say From: for all
         holder.mContentView.setText(mValues.get(position).PersonName);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
