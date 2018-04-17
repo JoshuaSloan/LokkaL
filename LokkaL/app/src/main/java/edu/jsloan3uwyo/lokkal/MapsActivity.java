@@ -55,7 +55,6 @@ import com.google.android.gms.tasks.Task;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener, FriendFragment.OnListFragmentInteractionListener {
 
-
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest mLocationRequest;
@@ -290,12 +289,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             // Display the fragment as the main content.
-            /*getFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .replace(android.R.id.content, new SettingsFragment())
                     .addToBackStack("settings")
                     .commit();
-                    */
-            Toast.makeText(getApplicationContext(), "Go to settings fragment", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "Go to settings fragment", Toast.LENGTH_LONG).show();
             return true;
 
         }
