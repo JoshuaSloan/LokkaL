@@ -133,7 +133,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.create_group) {
-                    Toast.makeText(getApplicationContext(), "Create New Group Fragment", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Create New Grp Fragment", Toast.LENGTH_LONG).show();
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.friends) {
