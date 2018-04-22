@@ -7,15 +7,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import edu.jsloan3uwyo.lokkal.GroupRequestFragment.OnListFragmentInteractionListener;
-import edu.jsloan3uwyo.lokkal.dummy.DummyContent.DummyItem;
 
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
+
 public class MyGroupRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyGroupRequestRecyclerViewAdapter.ViewHolder> {
 
     private final List<GroupRequest> mValues;
@@ -36,8 +31,9 @@ public class MyGroupRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyGr
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText("");
-        holder.mContentView.setText(mValues.get(position).GroupName);
+        holder.mIdView.setText(mValues.get(position).GroupName);
+        holder.mFromView.setText("From:");
+        holder.mContentView.setText(mValues.get(position).GroupCreatorName);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,13 +56,15 @@ public class MyGroupRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyGr
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
+        public final TextView mFromView;
         public GroupRequest mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id); //TODO: Change here as well as in xml for what is actually needed
-            mContentView = (TextView) view.findViewById(R.id.content); //TODO: Change here as well as in xml for what is actually needed
+            mFromView = (TextView) view.findViewById(R.id.gr_from);
+            mIdView = (TextView) view.findViewById(R.id.gr_group_name);
+            mContentView = (TextView) view.findViewById(R.id.gr_from_pn);
         }
 
         @Override

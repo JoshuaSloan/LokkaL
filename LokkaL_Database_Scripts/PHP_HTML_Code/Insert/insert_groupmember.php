@@ -1,12 +1,13 @@
 <?php
-
+$GroupID = addslashes($_REQUEST['GroupID']);
 $PersonID = addslashes($_REQUEST['PersonID']);
-$StartTime = addslashes($_REQUEST['StartTime']);
+$ResponseTypeID = addslashes($_REQUEST['ResponseTypeID']);
 
 include 'lib.php';
 
-   	$sql = "INSERT INTO GroupModule_GroupMembers (PersonID,StartTime) VALUES";
-   	$sql .= "('$PersonID', '$StartTime')";
+   	$sql = "INSERT INTO GroupModule_GroupMembers (GroupID, PersonID, StartTime, ResponseTypeID)
+   	VALUES (" . $GroupID . ", " . $PersonID . ", NOW(), " 
+   	. $ResponseTypeID . ")";
    	//echo "$sql\n";
    	$result = mysql_query($sql);
   	echo mysql_affected_rows($link_id);

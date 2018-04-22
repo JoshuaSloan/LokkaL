@@ -8,6 +8,7 @@ public class Group {
     int GroupID;
     String GroupName;
 
+
     Group(int gid, String gn)
     {
         GroupID = gid;

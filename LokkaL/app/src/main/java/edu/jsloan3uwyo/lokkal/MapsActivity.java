@@ -58,10 +58,33 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
+<<<<<<< HEAD
+<<<<<<< HEAD
+        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener, CreateGroupFragment.OnFragmentInteractionListener{
+=======
         FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener,
         SharedPreferences.OnSharedPreferenceChangeListener{
+>>>>>>> JoshuaSloan/master
+=======
+        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener,
+        SharedPreferences.OnSharedPreferenceChangeListener{
+>>>>>>> JoshuaSloan/master
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -92,8 +115,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         acc = (Person) getIntent().getSerializableExtra("Person");
 
-        //Toast.makeText(getApplicationContext(),acc.FirstName + " " +acc.LastName, Toast.LENGTH_LONG).show();
-
+        URI localuri = null;
+        MapsActivity myData;
+        try {
+            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_mygroup.php");
+            new queryMyG().execute(new sendToDatabase(localuri,acc.PersonID));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
         //create the main toolbar
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
@@ -150,7 +179,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.create_group) {
-                    Toast.makeText(getApplicationContext(), "Create New Grp Fragment", Toast.LENGTH_LONG).show();
+                    Bundle args = new Bundle();
+                    args.putSerializable("Person",acc);
+                    CreateGroupFragment  createGroupFragment = new CreateGroupFragment();
+                    createGroupFragment.setArguments(args);
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.addToBackStack(null);
+                    transaction.replace(R.id.map, createGroupFragment);
+                    transaction.commit();
+
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.friends) {
@@ -413,6 +450,118 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+    class sendToDatabase {
+        URI uri;
+        String data;
+
+        private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                if (first)
+                    first = false;
+                else
+                    result.append("&");
+
+                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+            }
+
+            return result.toString();
+        }
+
+        //Insert Group
+        sendToDatabase(URI myuri, int pid) {
+            uri = myuri;
+            HashMap<String, String> hmap = new HashMap<String, String>();
+            hmap.put("PersonID", String.valueOf(pid));
+            try {
+                data = getPostDataString(hmap);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    private class queryMyG extends AsyncTask<sendToDatabase, String, String> {
+
+        @Override
+        protected String doInBackground(sendToDatabase... params) {
+            try {
+                //setup the url
+                URL url = params[0].uri.toURL();
+                Log.wtf("network", url.toString());
+                //make the connection
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                //setup as post method and write out the parameters.
+                con.setRequestMethod("POST");
+                con.setDoInput(true);
+                con.setDoOutput(true);
+                OutputStream os = con.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(params[0].data);
+                writer.flush();
+                writer.close();
+                os.close();
+
+                //get the response code (ie success 200 or something else
+                int responseCode = con.getResponseCode();
+                Log.wtf("Response Code", String.valueOf(responseCode));
+                Log.wtf("Message", con.getResponseMessage());
+                String response = "";
+                //the return is a single number, so simple to read like this:
+                //note the while loop should not be necessary, but just in case.
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        Log.wtf("LINE", line);
+                        response += line;
+
+                    }
+                    if (response == "") {
+                        Log.wtf("QUERY", "Line was empty");
+                        response = "0";
+                    }
+                } else
+                    response = "0";
+                Log.wtf("RESPONSE", response);
+                if(response.compareTo("0") != 0)
+                {
+                    onProgressUpdate(response);
+                }
+                return response;
+            } catch (Exception e) {
+                // failure of some kind.  uncomment the stacktrace to see what happened if it is
+                // permit error.
+                e.printStackTrace();
+                return "0";
+            }
+
+        }
+        protected void onProgressUpdate(String... progress) {
+            //build the data structure as we go.
+            try
+            {
+                String parts[] = progress[0].split(",");
+                acc.setGroup(Integer.valueOf(parts[0]), parts[1]);
+                Log.v("GroupID", String.valueOf(acc.myGroup.GroupID));
+                Log.v("GroupName", acc.myGroup.GroupName);
+            }
+            catch(Exception e) {
+                Log.v("donetwork", "Error line: onProgressUpdate");
+                Log.v("Error", e.getMessage());
+            }
+        }
+    }
+}
+=======
+=======
+>>>>>>> JoshuaSloan/master
     @Override
     public void onBackPressed() {
         if (getFragmentManager().getBackStackEntryCount() != 0) //checks if settings fragment is open
@@ -438,4 +587,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
     }
+<<<<<<< HEAD
 }
+>>>>>>> JoshuaSloan/master
+=======
+}
+>>>>>>> JoshuaSloan/master

@@ -150,6 +150,20 @@ public class FriendFragment extends Fragment {
                     });
                     builder.show();
                 }
+                if(direction == ItemTouchHelper.RIGHT)
+                {
+                    //Sends Group Invite, if you are in a group
+                    if(acc.myGroup != null)
+                    {
+                        URI localuri = null;
+                        try {
+                            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_groupmember.php");
+                            new FriendFragment.insertGR().execute(new FriendFragment.sendToDatabase(localuri,acc.myGroup.GroupID ,acc.lof.get(position).PersonID, 1));
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
@@ -175,18 +189,7 @@ public class FriendFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onListFragmentInteraction(Friend f);
     }
 
@@ -211,7 +214,7 @@ public class FriendFragment extends Fragment {
             return result.toString();
         }
 
-        //Insert Friend Request
+        //Gets Friend List
         sendToDatabase(URI myuri, int pid) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
@@ -223,10 +226,25 @@ public class FriendFragment extends Fragment {
             }
 
         }
+        //Updates Friends List
         sendToDatabase (URI myuri, int fid, int rtid) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
             hmap.put("FriendshipID", String.valueOf(fid));
+            hmap.put("ResponseTypeID", String.valueOf(rtid));
+            try {
+                data = getPostDataString(hmap);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+        }
+        //Sends Group Invite
+        sendToDatabase (URI myuri,int gid, int pid, int rtid) {
+            uri = myuri;
+            HashMap<String, String> hmap = new HashMap<String, String>();
+            hmap.put("GroupID", String.valueOf(gid));
+            hmap.put("PersonID", String.valueOf(pid));
             hmap.put("ResponseTypeID", String.valueOf(rtid));
             try {
                 data = getPostDataString(hmap);
@@ -362,6 +380,50 @@ public class FriendFragment extends Fragment {
         }
     }
 
+    private class insertGR extends AsyncTask<FriendFragment.sendToDatabase, String, String> {
+        @Override
+        protected String doInBackground(FriendFragment.sendToDatabase... params) {
+            try {
+                //setup the url
+                URL url = params[0].uri.toURL();
+                Log.wtf("network", url.toString());
+                //make the connection
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                //setup as post method and write out the parameters.
+                con.setRequestMethod("POST");
+                con.setDoInput(true);
+                con.setDoOutput(true);
+                OutputStream os = con.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(params[0].data);
+                writer.flush();
+                writer.close();
+                os.close();
+                //get the response code (ie success 200 or something else
+                int responseCode = con.getResponseCode();
+                Log.wtf("Response Code", String.valueOf(responseCode));
+                Log.wtf("Message", con.getResponseMessage());
+                String response = "";
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        //This should be the number of rows affected. Should always be one.
+                        Log.wtf("LINE", line);
+                        response += line;
+                    }
+                }
+                Log.v("Response", response);
+                return response;
+            } catch (Exception e) {
+                // failure of some kind.  uncomment the stacktrace to see what happened if it is
+                // permit error.
+                e.printStackTrace();
+                return "0";
+            }
+        }
+    }
     public void doDataUpdate() {
         recyclerView.getAdapter().notifyDataSetChanged();
     }
