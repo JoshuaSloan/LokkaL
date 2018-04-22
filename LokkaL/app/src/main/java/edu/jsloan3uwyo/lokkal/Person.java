@@ -20,6 +20,8 @@ public class Person implements Serializable{
     public int PersonID = -1;
     public List<FriendRequest> lofr; //List Of Friend Requests
     public List<Friend> lof; //List Of Friends
+    public List<GroupRequest> logr; //List Of Group Requests
+    public Group myGroup; //User's current group
 
     //Empty Constructor
     Person()
@@ -35,5 +37,7 @@ public class Person implements Serializable{
         Password = p;
         lofr = new ArrayList<FriendRequest>();
         lof = new ArrayList<Friend>();
+        logr = new ArrayList<GroupRequest>();
+        //myGroup = new Group();
     }
 }

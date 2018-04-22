@@ -1,7 +1,6 @@
 package edu.jsloan3uwyo.lokkal;
 
 import android.app.AlertDialog;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -11,14 +10,14 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import edu.jsloan3uwyo.lokkal.dummy.DummyContent;
+import edu.jsloan3uwyo.lokkal.dummy.DummyContent.DummyItem;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -42,7 +41,7 @@ import java.util.Map;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class FriendRequestFragment extends Fragment {
+public class GroupRequestFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -56,13 +55,13 @@ public class FriendRequestFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FriendRequestFragment() {
+    public GroupRequestFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static FriendRequestFragment newInstance(int columnCount) {
-        FriendRequestFragment fragment = new FriendRequestFragment();
+    public static GroupRequestFragment newInstance(int columnCount) {
+        GroupRequestFragment fragment = new GroupRequestFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -82,43 +81,41 @@ public class FriendRequestFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_friendrequest_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_grouprequest_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-             recyclerView = (RecyclerView) view;
+            RecyclerView recyclerView = (RecyclerView) view;
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyFriendRequestRecyclerViewAdapter(acc.lofr, mListener));
+            recyclerView.setAdapter(new MyGroupRequestRecyclerViewAdapter(acc.logr, mListener));
         }
         return view;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         //Empty the list because we requery it.
-        acc.lofr.clear();
+        acc.logr.clear();
         URI localuri = null;
-        FriendRequestFragment myData;
-        //Return Friend Requests
+        GroupRequestFragment myData;
+        //Return Group Requests
         try {
-            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_friendrequests.php");
-            new FriendRequestFragment.pullFR().execute(new FriendRequestFragment.sendToDatabase(localuri,acc.PersonID));
+            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_grouprequests.php");
+            //new GroupRequestFragment.pullGR().execute(new GroupRequestFragment.sendToDatabase(localuri, acc.PersonID)); //TODO: figure out what needs to be done here
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         //Helper for handling the swipe right vs. swipe left
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 return false;
             }
-
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 //Gets position of the item on the list.
@@ -129,19 +126,19 @@ public class FriendRequestFragment extends Fragment {
                 {
                     Log.v("SWIPE:", "Swiping Left");
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("Delete Friend Request From " + acc.lofr.get(position).PersonName + "?");
+                    builder.setMessage("Delete Friend Request From " + acc.logr.get(position).GroupName + "?");
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             //Remove Item From Recycler View
                             URI localuri = null;
                             try {
-                                localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_friendrequest.php");
-                                new FriendRequestFragment.respondFR().execute(new FriendRequestFragment.sendToDatabase(localuri,acc.lofr.get(position).FriendshipID, 3));
+                                localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_grouprequest.php");
+                                new GroupRequestFragment.respondGR().execute(new GroupRequestFragment.sendToDatabase(localuri,acc.logr.get(position).GroupID, 3));
                                 //Removing friend request from list
                                 //The Async Thread notifies the adapater the dataset has been changed once done,
                                 //So we don't need to notify the adapter here.
-                                acc.lofr.remove(position);
+                                acc.logr.remove(position);
                             } catch (URISyntaxException e) {
                                 e.printStackTrace();
                             }
@@ -162,13 +159,13 @@ public class FriendRequestFragment extends Fragment {
                     Log.v("SWIPE:", "Swiping Right");
                     URI localuri = null;
                     try {
-                        localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_friendrequest.php");
-                        new FriendRequestFragment.respondFR().execute(new FriendRequestFragment.sendToDatabase(localuri,acc.lofr.get(position).FriendshipID, 2));
+                        localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_grouprequest.php");
+                        new GroupRequestFragment.respondGR().execute(new GroupRequestFragment.sendToDatabase(localuri,acc.logr.get(position).GroupID, 2));
                         //Removing friend request from list
                         //The Async Thread notifies the adapater the dataset has been changed once done,
                         //So we don't need to notify the adapter here.
-                        acc.lofr.remove(position);
-                        Toast.makeText(getActivity(), "Friend Request Accepted!", Toast.LENGTH_SHORT).show();
+                        acc.logr.remove(position);
+                        Toast.makeText(getActivity(), "Group Request Accepted!", Toast.LENGTH_SHORT).show();
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                     }
@@ -178,8 +175,7 @@ public class FriendRequestFragment extends Fragment {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         //Sets swipe functionality on the recycler view
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
-    }
+        };
 
     @Override
     public void onAttach(Context context) {
@@ -210,7 +206,7 @@ public class FriendRequestFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(FriendRequest fr);
+        void onListFragmentInteraction(GroupRequest gr);
     }
 
     class sendToDatabase {
@@ -234,7 +230,8 @@ public class FriendRequestFragment extends Fragment {
             return result.toString();
         }
 
-        //Insert Friend Request
+        //Insert Group Request
+        // TODO:FIGURE OUT HOW THESE NEED TO BE CHANGED
         sendToDatabase(URI myuri, int pid) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
@@ -246,7 +243,9 @@ public class FriendRequestFragment extends Fragment {
             }
 
         }
-        sendToDatabase (URI myuri, int fid, int rtid) {
+
+        // TODO:FIGURE OUT HOW THESE NEED TO BE CHANGED
+        sendToDatabase(URI myuri, int fid, int rtid) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
             hmap.put("FriendshipID", String.valueOf(fid));
@@ -256,13 +255,12 @@ public class FriendRequestFragment extends Fragment {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
-    private class pullFR extends AsyncTask<sendToDatabase, String, List<String>> {
+    private class pullGR extends AsyncTask<FriendRequestFragment.sendToDatabase, String, List<String>> {
         @Override
-        protected List<String> doInBackground(sendToDatabase... params) {
+        protected List<String> doInBackground(FriendRequestFragment.sendToDatabase... params) {
             try {
                 //setup the url
                 URL url = params[0].uri.toURL();
@@ -293,8 +291,7 @@ public class FriendRequestFragment extends Fragment {
                     BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     while ((line = br.readLine()) != null) {
                         Log.wtf("LINE", line);
-                        if(line.compareTo("") != 0)
-                        {
+                        if (line.compareTo("") != 0) {
                             los.add(line);
                             Log.v("LOS", String.valueOf(los.size()));
                         }
@@ -311,7 +308,6 @@ public class FriendRequestFragment extends Fragment {
                 e.printStackTrace();
                 return new ArrayList<String>();
             }
-
         }
 
         protected void onProgressUpdate(List<String> progress) {
@@ -319,10 +315,9 @@ public class FriendRequestFragment extends Fragment {
             try {
                 Log.v("Progress", String.valueOf(progress.size()));
                 //Splits results by CSV values
-                for(int i =0; i < progress.size(); i++)
-                {
+                for (int i = 0; i < progress.size(); i++) {
                     String parts[] = progress.get(i).split(",");
-                    acc.lofr.add(new FriendRequest(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), parts[2]));
+                    //acc.logr.add(new GroupRequest(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), parts[2])); //TODO: figure out what needs to be done here
                     Log.v("OPU", parts[0] + parts[1] + parts[2]);
                 }
 
@@ -331,63 +326,64 @@ public class FriendRequestFragment extends Fragment {
                 Log.v("Error", e.getMessage());
             }
         }
+
         protected void onPostExecute(List<String> result) {
             //Calls this at the end of the Async Task
             doDataUpdate();  //data has been added/removed, update the recyclerview.
         }
     }
-    //I think we have to create a different class to handle responding to the friend request.
-    private class respondFR extends AsyncTask<sendToDatabase, String, String> {
-        @Override
-        protected String doInBackground(sendToDatabase... params) {
-            try {
-                //setup the url
-                URL url = params[0].uri.toURL();
-                Log.wtf("network", url.toString());
-                //make the connection
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                //setup as post method and write out the parameters.
-                con.setRequestMethod("POST");
-                con.setDoInput(true);
-                con.setDoOutput(true);
-                OutputStream os = con.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(params[0].data);
-                writer.flush();
-                writer.close();
-                os.close();
-                //get the response code (ie success 200 or something else
-                int responseCode = con.getResponseCode();
-                Log.wtf("Response Code", String.valueOf(responseCode));
-                Log.wtf("Message", con.getResponseMessage());
-                String response = "";
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    String line;
-                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                    while ((line = br.readLine()) != null) {
-                        //This should be the number of rows affected. Should always be one.
-                        Log.wtf("LINE", line);
-                        response += line;
+        //I think we have to create a different class to handle responding to the friend request.
+        private class respondGR extends AsyncTask<GroupRequestFragment.sendToDatabase, String, String> {
+            @Override
+            protected String doInBackground(GroupRequestFragment.sendToDatabase... params) {
+                try {
+                    //setup the url
+                    URL url = params[0].uri.toURL();
+                    Log.wtf("network", url.toString());
+                    //make the connection
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    //setup as post method and write out the parameters.
+                    con.setRequestMethod("POST");
+                    con.setDoInput(true);
+                    con.setDoOutput(true);
+                    OutputStream os = con.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(os, "UTF-8"));
+                    writer.write(params[0].data);
+                    writer.flush();
+                    writer.close();
+                    os.close();
+                    //get the response code (ie success 200 or something else
+                    int responseCode = con.getResponseCode();
+                    Log.wtf("Response Code", String.valueOf(responseCode));
+                    Log.wtf("Message", con.getResponseMessage());
+                    String response = "";
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        String line;
+                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        while ((line = br.readLine()) != null) {
+                            //This should be the number of rows affected. Should always be one.
+                            Log.wtf("LINE", line);
+                            response += line;
+                        }
                     }
+                    Log.v("Response", response);
+                    return response;
+                } catch (Exception e) {
+                    // failure of some kind.  uncomment the stacktrace to see what happened if it is
+                    // permit error.
+                    e.printStackTrace();
+                    return "0";
                 }
-                Log.v("Response", response);
-                return response;
-            } catch (Exception e) {
-                // failure of some kind.  uncomment the stacktrace to see what happened if it is
-                // permit error.
-                e.printStackTrace();
-                return "0";
+            }
+
+            protected void onPostExecute(String result) {
+                //Calls this at the end of the Async Task
+                doDataUpdate();  //data has been added/removed, update the recyclerview.
             }
         }
-        protected void onPostExecute(String result) {
-            //Calls this at the end of the Async Task
-            doDataUpdate();  //data has been added/removed, update the recyclerview.
-        }
-    }
 
-    public void doDataUpdate() {
-        recyclerView.getAdapter().notifyDataSetChanged();
+    private void doDataUpdate() { recyclerView.getAdapter().notifyDataSetChanged();
     }
-
 }
+

@@ -6,17 +6,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import edu.jsloan3uwyo.lokkal.FriendFragment.OnListFragmentInteractionListener;
+import edu.jsloan3uwyo.lokkal.GroupRequestFragment.OnListFragmentInteractionListener;
+import edu.jsloan3uwyo.lokkal.dummy.DummyContent.DummyItem;
 
 import java.util.List;
 
+/**
+ * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
+ * specified {@link OnListFragmentInteractionListener}.
+ * TODO: Replace the implementation with code for your data type.
+ */
+public class MyGroupRequestRecyclerViewAdapter extends RecyclerView.Adapter<MyGroupRequestRecyclerViewAdapter.ViewHolder> {
 
-public class MyFriendRecyclerViewAdapter extends RecyclerView.Adapter<MyFriendRecyclerViewAdapter.ViewHolder> {
-
-    private final List<Friend> mValues;
+    private final List<GroupRequest> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyFriendRecyclerViewAdapter(List<Friend> items, OnListFragmentInteractionListener listener) {
+    public MyGroupRequestRecyclerViewAdapter(List<GroupRequest> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -24,15 +29,15 @@ public class MyFriendRecyclerViewAdapter extends RecyclerView.Adapter<MyFriendRe
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_friend, parent, false);
+                .inflate(R.layout.fragment_grouprequest, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(""); //start with blank string so friends list does not say From: for all
-        holder.mContentView.setText(mValues.get(position).PersonName);
+        holder.mIdView.setText("");
+        holder.mContentView.setText(mValues.get(position).GroupName);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,13 +60,13 @@ public class MyFriendRecyclerViewAdapter extends RecyclerView.Adapter<MyFriendRe
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public Friend mItem;
+        public GroupRequest mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.fid);
-            mContentView = (TextView) view.findViewById(R.id.fname);
+            mIdView = (TextView) view.findViewById(R.id.id); //TODO: Change here as well as in xml for what is actually needed
+            mContentView = (TextView) view.findViewById(R.id.content); //TODO: Change here as well as in xml for what is actually needed
         }
 
         @Override
