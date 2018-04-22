@@ -307,6 +307,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
 
         }
+        else if (id == R.id.sign_out)
+        {
+            this.finish();
+            System.exit(0);
+        }
         return super.onOptionsItemSelected(item);
     }
 
