@@ -86,7 +86,7 @@ public class GroupRequestFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
             } else {
@@ -106,7 +106,7 @@ public class GroupRequestFragment extends Fragment {
         //Return Group Requests
         try {
             localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_grouprequests.php");
-            //new GroupRequestFragment.pullGR().execute(new GroupRequestFragment.sendToDatabase(localuri, acc.PersonID)); //TODO: figure out what needs to be done here
+            new pullGR().execute(new sendToDatabase(localuri, acc.PersonID));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -120,13 +120,13 @@ public class GroupRequestFragment extends Fragment {
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 //Gets position of the item on the list.
                 final int position = viewHolder.getAdapterPosition();
-                FriendRequestFragment myData;
-                //Declining Friend Request
+                GroupRequestFragment myData;
+                //Declining Group Request
                 if(direction == ItemTouchHelper.LEFT)
                 {
                     Log.v("SWIPE:", "Swiping Left");
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("Delete Friend Request From " + acc.logr.get(position).GroupName + "?");
+                    builder.setMessage("Delete Group Request From " + acc.logr.get(position).GroupCreatorName + "?");
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -134,7 +134,7 @@ public class GroupRequestFragment extends Fragment {
                             URI localuri = null;
                             try {
                                 localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_grouprequest.php");
-                                new GroupRequestFragment.respondGR().execute(new GroupRequestFragment.sendToDatabase(localuri,acc.logr.get(position).GroupID, 3));
+                                new respondGR().execute(new sendToDatabase(localuri,acc.logr.get(position).GroupMemberID, 3));
                                 //Removing friend request from list
                                 //The Async Thread notifies the adapater the dataset has been changed once done,
                                 //So we don't need to notify the adapter here.
@@ -160,7 +160,7 @@ public class GroupRequestFragment extends Fragment {
                     URI localuri = null;
                     try {
                         localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_grouprequest.php");
-                        new GroupRequestFragment.respondGR().execute(new GroupRequestFragment.sendToDatabase(localuri,acc.logr.get(position).GroupID, 2));
+                        new respondGR().execute(new sendToDatabase(localuri,acc.logr.get(position).GroupMemberID, 2));
                         //Removing friend request from list
                         //The Async Thread notifies the adapater the dataset has been changed once done,
                         //So we don't need to notify the adapter here.
@@ -230,8 +230,7 @@ public class GroupRequestFragment extends Fragment {
             return result.toString();
         }
 
-        //Insert Group Request
-        // TODO:FIGURE OUT HOW THESE NEED TO BE CHANGED
+        //Pulling all group requests
         sendToDatabase(URI myuri, int pid) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
@@ -243,12 +242,10 @@ public class GroupRequestFragment extends Fragment {
             }
 
         }
-
-        // TODO:FIGURE OUT HOW THESE NEED TO BE CHANGED
-        sendToDatabase(URI myuri, int fid, int rtid) {
+        sendToDatabase(URI myuri, int gmid, int rtid) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
-            hmap.put("FriendshipID", String.valueOf(fid));
+            hmap.put("GroupMemberID", String.valueOf(gmid));
             hmap.put("ResponseTypeID", String.valueOf(rtid));
             try {
                 data = getPostDataString(hmap);
@@ -258,9 +255,9 @@ public class GroupRequestFragment extends Fragment {
         }
     }
 
-    private class pullGR extends AsyncTask<FriendRequestFragment.sendToDatabase, String, List<String>> {
+    private class pullGR extends AsyncTask<sendToDatabase, String, List<String>> {
         @Override
-        protected List<String> doInBackground(FriendRequestFragment.sendToDatabase... params) {
+        protected List<String> doInBackground(sendToDatabase... params) {
             try {
                 //setup the url
                 URL url = params[0].uri.toURL();
@@ -317,7 +314,7 @@ public class GroupRequestFragment extends Fragment {
                 //Splits results by CSV values
                 for (int i = 0; i < progress.size(); i++) {
                     String parts[] = progress.get(i).split(",");
-                    //acc.logr.add(new GroupRequest(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), parts[2])); //TODO: figure out what needs to be done here
+                    acc.logr.add(new GroupRequest(Integer.valueOf(parts[0]), parts[1], parts[2]));
                     Log.v("OPU", parts[0] + parts[1] + parts[2]);
                 }
 
@@ -333,9 +330,9 @@ public class GroupRequestFragment extends Fragment {
         }
     }
         //I think we have to create a different class to handle responding to the friend request.
-        private class respondGR extends AsyncTask<GroupRequestFragment.sendToDatabase, String, String> {
+        private class respondGR extends AsyncTask<sendToDatabase, String, String> {
             @Override
-            protected String doInBackground(GroupRequestFragment.sendToDatabase... params) {
+            protected String doInBackground(sendToDatabase... params) {
                 try {
                     //setup the url
                     URL url = params[0].uri.toURL();
@@ -383,7 +380,8 @@ public class GroupRequestFragment extends Fragment {
             }
         }
 
-    private void doDataUpdate() { recyclerView.getAdapter().notifyDataSetChanged();
+    private void doDataUpdate() {
+        recyclerView.getAdapter().notifyDataSetChanged();
     }
 }
 

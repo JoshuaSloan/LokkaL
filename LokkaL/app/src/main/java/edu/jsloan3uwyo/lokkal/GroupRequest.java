@@ -6,14 +6,12 @@ package edu.jsloan3uwyo.lokkal;
 
 public class GroupRequest {
     int GroupMemberID;
-    int GroupID;
     String GroupName;
     String GroupCreatorName;
 
-    GroupRequest(int gmid, int gid, String gn, String gcn)
+    GroupRequest(int gmid, String gn, String gcn)
     {
         GroupMemberID = gmid;
-        GroupID = gid;
         GroupName = gn;
         GroupCreatorName = gcn;
     }

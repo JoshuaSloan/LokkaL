@@ -38,6 +38,11 @@ public class Person implements Serializable{
         lofr = new ArrayList<FriendRequest>();
         lof = new ArrayList<Friend>();
         logr = new ArrayList<GroupRequest>();
-        //myGroup = new Group();
     }
+
+    public void setGroup(int gid, String gn)
+    {
+        myGroup = new Group(gid, gn);
+    }
+
 }
