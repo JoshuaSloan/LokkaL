@@ -2,6 +2,8 @@ package edu.jsloan3uwyo.lokkal;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -10,6 +12,8 @@ import android.location.LocationListener;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.preference.ListPreference;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -17,6 +21,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -55,7 +60,8 @@ import com.google.android.gms.tasks.Task;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
-        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener{
+        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener,
+        SharedPreferences.OnSharedPreferenceChangeListener{
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -67,6 +73,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerlayout;
     private NavigationView navView;
+
+    String updateInterval;
 
     Person acc;
 
@@ -177,7 +185,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     AddFriendFragment addFriendFragment = new AddFriendFragment();
                     addFriendFragment.setArguments(args);
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
                     transaction.addToBackStack(null);
                     transaction.replace(R.id.map, addFriendFragment);
                     transaction.commit();
@@ -326,8 +333,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     protected void createLocationRequest() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
+        //mLocationRequest.setInterval(10000);
+        if (sharedPref.getString("pref_update_speed","2").equals("1"))
+        {
+            mLocationRequest.setInterval(5000);
+            Log.i("speed", "5 seconds");
+        }
+        else if (sharedPref.getString("pref_update_speed","2").equals("2"))
+        {
+            mLocationRequest.setInterval(10000);
+            Log.i("speed", "10 seconds");
+        }
+        else if (sharedPref.getString("pref_update_speed","2").equals("3"))
+        {
+            mLocationRequest.setInterval(30000);
+            Log.i("speed", "30 seconds");
+        }
+        else if (sharedPref.getString("pref_update_speed","2").equals("4"))
+        {
+            mLocationRequest.setInterval(60000);
+            Log.i("speed", "1 minute");
+        }
+        else
+        {
+            mLocationRequest.setInterval(10000);
+            Log.i("speed", "default: 10 seconds");
+        }
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         // TODO: See performance hint available at: https://developer.android.com/training/location/change-location-settings.html
@@ -381,11 +415,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBackPressed() {
+        if (getFragmentManager().getBackStackEntryCount() != 0) //checks if settings fragment is open
+        {
+            getFragmentManager().popBackStackImmediate();
+
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            //createLocationRequest(); //TODO: check about updating the speed?
+        }
         clearStack();
     }
 
     public void clearStack() {
-
         //Here we are clearing back stack fragment entries
         int backStackEntry = getSupportFragmentManager().getBackStackEntryCount();
         if (backStackEntry > 0) {
@@ -393,5 +433,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 getSupportFragmentManager().popBackStackImmediate();
             }
         }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
     }
 }

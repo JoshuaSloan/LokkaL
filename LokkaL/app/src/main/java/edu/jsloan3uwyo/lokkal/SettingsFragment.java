@@ -55,7 +55,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        //now we can do a dynamic check for invalid settings (i.e. disable pp AND tbt)
     }
 
     public interface OnFragmentInteractionListener {
