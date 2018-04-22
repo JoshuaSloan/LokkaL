@@ -69,7 +69,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -401,6 +403,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 mLastLocation = locationResult.getLastLocation();
+                URI localuri = null;
+                MapsActivity myData;
+                //Return Group Requests
+                try {
+                    localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_groupmemberlocation.php");
+                    new insertGML().execute(new myLocation(localuri, acc.myGroupMemberID, mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
                 Log.i("update", "Last location updated sucessfully.");
                 updateMap();
             }
@@ -410,17 +421,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void updateMap() {
         // remove old markers
         mMap.clear();
+        if(acc.myGroup !=  null) {
+            URI localuri = null;
+            MapsActivity myData;
+            //Return Friends
+            try {
+                acc.myGroup.logm.clear();
+                localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_groupmembers.php");
+                new queryGM().execute(new myLocation(localuri, acc.myGroup.GroupID));
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            // create latlng for marker position
+            LatLng mLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
 
-        // create latlng for marker position
-        LatLng mLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            // create marker with title of the latlng and bitmap as the icon
+            final Marker mMarker = mMap.addMarker(new MarkerOptions().position(mLatLng).title(mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude()));
 
-        // create marker with title of the latlng and bitmap as the icon
-        final Marker mMarker = mMap.addMarker(new MarkerOptions().position(mLatLng).title(mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude()));
+            // move the map over the new marker
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatLng));
 
-        // move the map over the new marker
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatLng));
-
-        mMap.setMinZoomPreference(15);
+            mMap.setMinZoomPreference(15);
+        }
     }
     @Override
     public void onFragmentInteraction(Uri uri) {}
@@ -462,7 +486,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return result.toString();
         }
 
-        //Insert Group
+        //Find My Group
         sendToDatabase(URI myuri, int pid) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
@@ -475,6 +499,55 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }
+
+    class myLocation {
+        URI uri;
+        String data;
+
+        private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                if (first)
+                    first = false;
+                else
+                    result.append("&");
+
+                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+            }
+
+            return result.toString();
+        }
+
+        //Insert My Location Into the Database
+        myLocation(URI myuri, int gmid, double lat, double lon) {
+            uri = myuri;
+            HashMap<String, String> hmap = new HashMap<String, String>();
+            hmap.put("GroupMemberID", String.valueOf(gmid));
+            hmap.put("Latitude", String.valueOf(lat));
+            hmap.put("Longitude", String.valueOf(lon));
+            try {
+                data = getPostDataString(hmap);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+        }
+        myLocation(URI myuri, int gid) {
+            uri = myuri;
+            HashMap<String, String> hmap = new HashMap<String, String>();
+            hmap.put("GroupID", String.valueOf(gid));
+            try {
+                data = getPostDataString(hmap);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
     private class queryMyG extends AsyncTask<sendToDatabase, String, String> {
 
         @Override
@@ -538,8 +611,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             {
                 String parts[] = progress[0].split(",");
                 acc.setGroup(Integer.valueOf(parts[0]), parts[1]);
+                acc.myGroupMemberID = Integer.valueOf(parts[2]);
                 Log.v("GroupID", String.valueOf(acc.myGroup.GroupID));
                 Log.v("GroupName", acc.myGroup.GroupName);
+                Log.v("GroupMemberID ", String.valueOf(acc.myGroupMemberID));
             }
             catch(Exception e) {
                 Log.v("donetwork", "Error line: onProgressUpdate");
@@ -573,4 +648,156 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
     }
+
+    private class insertGML extends AsyncTask<myLocation, String, String> {
+
+        //how to write the parameters via a post method were used from here:
+        //http://stackoverflow.com/questions/29536233/deprecated-http-classes-android-lollipop-5-1
+
+        @Override
+        protected String doInBackground(myLocation... params) {
+            try {
+                //setup the url
+                URL url = params[0].uri.toURL();
+                Log.wtf("network", url.toString());
+                //make the connection
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                //setup as post method and write out the parameters.
+                con.setRequestMethod("POST");
+                con.setDoInput(true);
+                con.setDoOutput(true);
+                OutputStream os = con.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(params[0].data);
+                writer.flush();
+                writer.close();
+                os.close();
+
+                //get the response code (ie success 200 or something else
+                int responseCode = con.getResponseCode();
+                Log.wtf("Response Code", String.valueOf(responseCode));
+                Log.wtf("Message", con.getResponseMessage());
+                String response = "";
+                //the return is a single number, so simple to read like this:
+                //note the while loop should not be necessary, but just in case.
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        Log.wtf("LINE", line);
+                        response += line;
+
+                    }
+                    if (response == "") {
+                        Log.wtf("QUERY", "Line was empty");
+                        response = "0";
+                    }
+                } else
+                    response = "0";
+                Log.wtf("RESPONSE", response);
+                onProgressUpdate(response);
+                return response;
+            } catch (Exception e) {
+                // failure of some kind.  uncomment the stacktrace to see what happened if it is
+                // permit error.
+                e.printStackTrace();
+                return "0";
+            }
+        }
+    }
+    private class queryGM extends AsyncTask<myLocation, String, List<String>> {
+
+        @Override
+        protected List<String> doInBackground(myLocation... params) {
+            try {
+                //setup the url
+                URL url = params[0].uri.toURL();
+                Log.wtf("network", url.toString());
+                //make the connection
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                //setup as post method and write out the parameters.
+                con.setRequestMethod("POST");
+                con.setDoInput(true);
+                con.setDoOutput(true);
+                OutputStream os = con.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(params[0].data);
+                writer.flush();
+                writer.close();
+                os.close();
+
+                //get the response code (ie success 200 or something else
+                int responseCode = con.getResponseCode();
+                Log.wtf("Response Code", String.valueOf(responseCode));
+                Log.wtf("Message", con.getResponseMessage());
+                List<String> los = new ArrayList<String>();
+                //the return is a single number, so simple to read like this:
+                //note the while loop should not be necessary, but just in case.
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    String line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        Log.wtf("LINE", line);
+                        if(line.compareTo("") != 0)
+                        {
+                            los.add(line);
+                            Log.v("LOS", String.valueOf(los.size()));
+                        }
+
+                    }
+
+                }
+                Log.v("LOS - After loop", String.valueOf(los.size()));
+                onProgressUpdate(los);
+                return los;
+            } catch (Exception e) {
+                // failure of some kind.  uncomment the stacktrace to see what happened if it is
+                // permit error.
+                e.printStackTrace();
+                return new ArrayList<String>();
+            }
+
+        }
+        protected void onProgressUpdate(List<String> progress) {
+            //build the data structure as we go.
+            try {
+                Log.v("Progress", String.valueOf(progress.size()));
+
+                //Splits results by CSV values
+                for(int i = 0; i < progress.size(); i++)
+                {
+                    String parts[] = progress.get(i).split(",");
+                    acc.myGroup.logm.add(new GroupMember(Integer.valueOf(parts[0]), parts[1], Double.valueOf(parts[2]), Double.valueOf(parts[3])));
+                    //Log.v("OPU", parts[0] + parts[1] + parts[2]);
+                    Log.v("Output:", parts[0] + parts[1] + parts[2] + parts[3]);
+                }
+            }
+            catch(Exception e) {
+                Log.v("donetwork", "Error line: onProgressUpdate");
+                Log.v("Error", e.getMessage());
+            }
+        }
+        protected void onPostExecute(List<String> result) {
+            //Calls this at the end of the Async Task
+            updateGroupLocation();  //data has been added/removed, update the recyclerview.
+        }
+    }
+    public void updateGroupLocation()
+    {
+        mMap.clear();
+        for(int i =0; i < acc.myGroup.logm.size(); i++) {
+            LatLng mLatLng = new LatLng(acc.myGroup.logm.get(i).Latitude, acc.myGroup.logm.get(i).Longitude);
+
+            // create marker with title of the latlng and bitmap as the icon
+            final Marker mMarker = mMap.addMarker(new MarkerOptions().position(mLatLng).title(acc.myGroup.logm.get(i).GroupMemberName));
+        }
+        // move the map over the new marker
+        LatLng moveCamera = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(moveCamera));
+
+        mMap.setMinZoomPreference(15);
+    }
+
 }

@@ -18,6 +18,7 @@ public class Person implements Serializable{
     public String Email = "";
     public String Password = "";
     public int PersonID = -1;
+    public int myGroupMemberID = -1;
     public List<FriendRequest> lofr; //List Of Friend Requests
     public List<Friend> lof; //List Of Friends
     public List<GroupRequest> logr; //List Of Group Requests
@@ -44,5 +45,4 @@ public class Person implements Serializable{
     {
         myGroup = new Group(gid, gn);
     }
-
 }
