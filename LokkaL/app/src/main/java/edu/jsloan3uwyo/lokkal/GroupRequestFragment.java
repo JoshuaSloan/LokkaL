@@ -103,7 +103,7 @@ public class GroupRequestFragment extends Fragment {
         acc.logr.clear();
         URI localuri = null;
         GroupRequestFragment myData;
-        //Return Friend Requests
+        //Return Group Requests
         try {
             localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_grouprequests.php");
             //new GroupRequestFragment.pullGR().execute(new GroupRequestFragment.sendToDatabase(localuri, acc.PersonID)); //TODO: figure out what needs to be done here
@@ -300,7 +300,7 @@ public class GroupRequestFragment extends Fragment {
 
                 }
                 Log.v("LOS - After loop", String.valueOf(los.size()));
-                onProgressUpdate(los); //TODO: figure out what needs to be done here
+                onProgressUpdate(los);
                 return los;
             } catch (Exception e) {
                 // failure of some kind.  uncomment the stacktrace to see what happened if it is
@@ -376,15 +376,14 @@ public class GroupRequestFragment extends Fragment {
                     return "0";
                 }
             }
+
+            protected void onPostExecute(String result) {
+                //Calls this at the end of the Async Task
+                doDataUpdate();  //data has been added/removed, update the recyclerview.
+            }
         }
 
-        protected void onPostExecute(String result) {
-            //Calls this at the end of the Async Task
-            doDataUpdate();  //data has been added/removed, update the recyclerview.
-        }
-
-    private void doDataUpdate() {
-        recyclerView.getAdapter().notifyDataSetChanged();
+    private void doDataUpdate() { recyclerView.getAdapter().notifyDataSetChanged();
     }
 }
 

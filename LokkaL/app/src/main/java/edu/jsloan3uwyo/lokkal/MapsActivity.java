@@ -54,7 +54,7 @@ import com.google.android.gms.tasks.Task;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
-        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener{
+        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener{
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -129,7 +129,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.group_requests) {
-                    Toast.makeText(getApplicationContext(), "Go to group requests", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), "Go to group requests", Toast.LENGTH_LONG).show();
+                    Bundle args = new Bundle();
+                    args.putSerializable("Person",acc);
+                    GroupRequestFragment groupRequestFragment = new GroupRequestFragment();
+                    groupRequestFragment.setArguments(args);
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.addToBackStack(null);
+                    transaction.replace(R.id.map, groupRequestFragment);
+                    transaction.commit();
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.create_group) {
@@ -357,6 +365,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onListFragmentInteraction(Friend f) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(GroupRequest gr) {
 
     }
 }
