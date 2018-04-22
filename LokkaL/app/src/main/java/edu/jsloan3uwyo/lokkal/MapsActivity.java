@@ -75,7 +75,12 @@ import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
 <<<<<<< HEAD
+<<<<<<< HEAD
         FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener, CreateGroupFragment.OnFragmentInteractionListener{
+=======
+        FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener,
+        SharedPreferences.OnSharedPreferenceChangeListener{
+>>>>>>> JoshuaSloan/master
 =======
         FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener,
         SharedPreferences.OnSharedPreferenceChangeListener{
@@ -446,6 +451,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     class sendToDatabase {
         URI uri;
         String data;
@@ -554,6 +560,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 }
 =======
+=======
+>>>>>>> JoshuaSloan/master
     @Override
     public void onBackPressed() {
         if (getFragmentManager().getBackStackEntryCount() != 0) //checks if settings fragment is open
@@ -579,5 +587,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
     }
+<<<<<<< HEAD
+}
+>>>>>>> JoshuaSloan/master
+=======
 }
 >>>>>>> JoshuaSloan/master
