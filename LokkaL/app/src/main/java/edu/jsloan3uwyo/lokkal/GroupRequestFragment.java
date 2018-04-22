@@ -161,6 +161,7 @@ public class GroupRequestFragment extends Fragment {
                     try {
                         localuri = new URI("http://www.cs.uwyo.edu/~kfenster/update_grouprequest.php");
                         new respondGR().execute(new sendToDatabase(localuri,acc.logr.get(position).GroupMemberID, 2));
+
                         //Removing friend request from list
                         //The Async Thread notifies the adapater the dataset has been changed once done,
                         //So we don't need to notify the adapter here.

@@ -1,0 +1,18 @@
+SELECT gm.GroupMemberID
+, CONCAT(p.FirstName, ' ', p.LastName) as GroupMemberName
+, (SELECT gml.Latitude
+	FROM GroupModule_GroupMemberLocation as gml
+	WHERE gml.GroupMemberID = gm.GroupMemberID
+	ORDER BY gml.LocationTime DESC
+	LIMIT 1
+	) as Latitude
+,(SELECT TOP 1 gml.Longitude
+	FROM GroupModule_GroupMemberLocation as gml
+	WHERE gml.GroupMemberID = gm.GroupMemberID
+	ORDER BY gml.LocationTime DESC
+	LIMIT 1
+	) as Longitude
+FROM GroupMoudle_GroupMembers as gm
+INNER JOIN PersonModule_Person as p
+ON p.PersonID = gm.PersonID
+WHERE gm.GroupID = " . $GroupID

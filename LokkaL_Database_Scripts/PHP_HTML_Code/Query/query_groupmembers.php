@@ -4,36 +4,33 @@
 
   include 'lib.php';
 
-   $sql = "SELECT gs.GroupID
-   	, gm.GroupMemberID
-   	, gm.GroupName
-	, p.FirstName + ' ' + p.LastName as PersonName
-	, gml.Latitude 
-	, gml.Longitude
-FROM GroupModule_GroupSession as gs
-INNER JOIN GroupModule_GroupMembers as gm
-ON gs.GroupID = gm.GroupID
-INNER JOIN GroupModule_GroupMemberLocation as gml
-ON gml.GroupMemberID = gm.GroupMemberID
+   $sql = "SELECT gm.GroupMemberID
+ , CONCAT(p.FirstName, ' ', p.LastName) as GroupMemberName
+, IFNULL((SELECT gml.Latitude
+  FROM GroupModule_GroupMemberLocation as gml
+  WHERE gml.GroupMemberID = gm.GroupMemberID
+  ORDER BY gml.LocationTime DESC
+  LIMIT 1
+  ), 41.3314) as Latitude
+  ,IFNULL((SELECT gml.Longitude
+  FROM GroupModule_GroupMemberLocation as gml
+  WHERE gml.GroupMemberID = gm.GroupMemberID
+  ORDER BY gml.LocationTime DESC
+  LIMIT 1
+  ), -105.5911) as Longitude
+FROM GroupModule_GroupMembers as gm
 INNER JOIN PersonModule_Person as p
-ON p.PersonID = gml.PersonID
-WHERE ISNULL (gs.Active,1) <> 0
-AND ISNULL (gm.Active,1) <> 0
-AND ISNULL (gml.Active,1) <> 0
-AND ISNULL (p.Active,1) <> 0
-AND gm.Accepted = 1
-AND CAST(NOW() as DATE) BETWEEN CAST(gm.StartDate as DATE) AND CAST(ISNULL(gm.EndDate, '9999-12-31') as DATE)
-AND GroupID = " . $GroupID;
+ON p.PersonID = gm.PersonID
+WHERE gm.ResponseTypeID = 2
+AND gm.GroupID = " . $GroupID;
 
 $result = mysql_query($sql);
 while($ary = mysql_fetch_array($result)) {
-  $GroupID = stripslashes($ary["GroupID"]);
   $GroupMemberID = stripslashes($ary["GroupMemberID"]);
-  $GroupName = stripslashes($ary["GroupName"]);
-  $PersonName = stripslashes($ary["PersonName"]);
+  $GroupMemberName = stripslashes($ary["GroupMemberName"]);
   $Latitude = stripslashes($ary["Latitude"]);
   $Longitude = stripslashes($ary["Longitude"]);
-  echo "$GroupID,$GroupMemberID,$GroupName,$PersonName,$Latitude,$Longitude\n";
+  echo "$GroupMemberID,$GroupMemberName,$Latitude,$Longitude\n";
 }
  mysql_close($link_id);
 
