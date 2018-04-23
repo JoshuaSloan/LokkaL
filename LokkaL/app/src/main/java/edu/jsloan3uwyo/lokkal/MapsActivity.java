@@ -51,6 +51,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -70,9 +71,21 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_CYAN;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_GREEN;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_MAGENTA;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_RED;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ROSE;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_VIOLET;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_YELLOW;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
@@ -90,6 +103,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DrawerLayout drawerlayout;
     private NavigationView navView;
 
+    public ArrayList<Float> colorList;
     String updateInterval;
 
     Person acc;
@@ -107,6 +121,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         acc = (Person) getIntent().getSerializableExtra("Person");
+        colorList = new ArrayList<Float>(Arrays.asList(HUE_RED, HUE_BLUE, HUE_GREEN, HUE_YELLOW, HUE_CYAN,
+                 HUE_MAGENTA, HUE_ORANGE, HUE_ROSE, HUE_VIOLET,HUE_AZURE ));
 
         URI localuri = null;
         MapsActivity myData;
@@ -791,7 +807,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             LatLng mLatLng = new LatLng(acc.myGroup.logm.get(i).Latitude, acc.myGroup.logm.get(i).Longitude);
 
             // create marker with title of the latlng and bitmap as the icon
-            final Marker mMarker = mMap.addMarker(new MarkerOptions().position(mLatLng).title(acc.myGroup.logm.get(i).GroupMemberName));
+            final Marker mMarker = mMap.addMarker(new MarkerOptions().position(mLatLng).title(acc.myGroup.logm.get(i).GroupMemberName)
+            .icon(BitmapDescriptorFactory.defaultMarker(colorList.get(i))));
+            //mMarker.showInfoWindow();
         }
         // move the map over the new marker
         LatLng moveCamera = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
