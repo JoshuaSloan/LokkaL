@@ -90,7 +90,7 @@ import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_YELL
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, AddFriendFragment.OnFragmentInteractionListener, FriendRequestFragment.OnListFragmentInteractionListener,
         FriendFragment.OnListFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener, GroupRequestFragment.OnListFragmentInteractionListener,
-    CreateGroupFragment.OnFragmentInteractionListener, SharedPreferences.OnSharedPreferenceChangeListener{
+    CreateGroupFragment.OnFragmentInteractionListener, SharedPreferences.OnSharedPreferenceChangeListener, GroupFragment.OnListFragmentInteractionListener{
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -172,7 +172,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 int id = menuItem.getItemId();
 
                 if (id == R.id.group_management) {
-                    Toast.makeText(getApplicationContext(), "Go to group management", Toast.LENGTH_LONG).show();
+                    Bundle args = new Bundle();
+                    args.putSerializable("Person",acc);
+                    GroupFragment groupFragment = new GroupFragment();
+                    groupFragment.setArguments(args);
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    transaction.addToBackStack(null);
+                    transaction.replace(R.id.map, groupFragment);
+                    transaction.commit();
                     drawerlayout.closeDrawers();
                     return true;
                 } else if (id == R.id.group_requests) {
@@ -478,6 +485,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onListFragmentInteraction(GroupRequest gr) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(GroupMember item) {
 
     }
 
