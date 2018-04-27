@@ -22,6 +22,7 @@ FROM GroupModule_GroupMembers as gm
 INNER JOIN PersonModule_Person as p
 ON p.PersonID = gm.PersonID
 WHERE gm.ResponseTypeID = 2
+AND NOW() BETWEEN StartTime AND IFNULL(EndTime,'9999-12-31')
 AND gm.GroupID = " . $GroupID;
 
 $result = mysql_query($sql);
