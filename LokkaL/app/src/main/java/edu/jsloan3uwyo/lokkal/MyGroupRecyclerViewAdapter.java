@@ -30,7 +30,7 @@ public class MyGroupRecyclerViewAdapter extends RecyclerView.Adapter<MyGroupRecy
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(""); //start with blank string so friends list does not say From: for all
+        holder.mIdView.setText(String.valueOf(mValues.get(position).batLife * 100) + "%");
         holder.mContentView.setText(mValues.get(position).GroupMemberName);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {

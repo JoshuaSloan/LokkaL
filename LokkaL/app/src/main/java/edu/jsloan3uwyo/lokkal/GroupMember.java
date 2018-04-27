@@ -14,12 +14,13 @@ public class GroupMember {
 
 
 
-    GroupMember(int gmid, String gmn, double lat, double lon)
+    GroupMember(int gmid, String gmn, double lat, double lon, double bl)
     {
         GroupMemberID = gmid;
         GroupMemberName = gmn;
         Latitude = lat;
         Longitude = lon;
+        batLife = bl;
 
     }
 

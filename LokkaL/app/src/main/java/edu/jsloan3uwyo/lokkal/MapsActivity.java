@@ -3,6 +3,8 @@ package edu.jsloan3uwyo.lokkal;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -11,6 +13,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Looper;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
@@ -428,10 +431,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mLastLocation = locationResult.getLastLocation();
                 URI localuri = null;
                 MapsActivity myData;
+                IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                Intent batteryStatus = getApplicationContext().registerReceiver(null,ifilter);
+                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                double batteryPercent = level / (double) scale;
                 //Return Group Requests
                 try {
                     localuri = new URI("http://www.cs.uwyo.edu/~kfenster/insert_groupmemberlocation.php");
-                    new insertGML().execute(new myLocation(localuri, acc.myGroupMemberID, mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+
+                    new insertGML().execute(new myLocation(localuri, acc.myGroupMemberID, mLastLocation.getLatitude(), mLastLocation.getLongitude(), batteryPercent));
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                 }
@@ -550,12 +559,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         //Insert My Location Into the Database
-        myLocation(URI myuri, int gmid, double lat, double lon) {
+        myLocation(URI myuri, int gmid, double lat, double lon, double bl) {
             uri = myuri;
             HashMap<String, String> hmap = new HashMap<String, String>();
             hmap.put("GroupMemberID", String.valueOf(gmid));
             hmap.put("Latitude", String.valueOf(lat));
             hmap.put("Longitude", String.valueOf(lon));
+            hmap.put("BatteryLife", String.valueOf(bl));
             try {
                 data = getPostDataString(hmap);
             } catch (UnsupportedEncodingException e) {
@@ -797,9 +807,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 for(int i = 0; i < progress.size(); i++)
                 {
                     String parts[] = progress.get(i).split(",");
-                    acc.myGroup.logm.add(new GroupMember(Integer.valueOf(parts[0]), parts[1], Double.valueOf(parts[2]), Double.valueOf(parts[3])));
+                    acc.myGroup.logm.add(new GroupMember(Integer.valueOf(parts[0]), parts[1], Double.valueOf(parts[2]), Double.valueOf(parts[3]), Double.valueOf(parts[4])));
                     //Log.v("OPU", parts[0] + parts[1] + parts[2]);
-                    Log.v("Output:", parts[0] + parts[1] + parts[2] + parts[3]);
+                    Log.v("Output:", parts[0] + parts[1] + parts[2] + parts[3] + parts[4]);
                 }
             }
             catch(Exception e) {
@@ -819,7 +829,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             LatLng mLatLng = new LatLng(acc.myGroup.logm.get(i).Latitude, acc.myGroup.logm.get(i).Longitude);
 
             // create marker with title of the latlng and bitmap as the icon
-            final Marker mMarker = mMap.addMarker(new MarkerOptions().position(mLatLng).title(acc.myGroup.logm.get(i).GroupMemberName)
+            final Marker mMarker = mMap.addMarker(new MarkerOptions().position(mLatLng).title(acc.myGroup.logm.get(i).GroupMemberName + " - " +String.valueOf(acc.myGroup.logm.get(i).batLife * 100) + "%")
             .icon(BitmapDescriptorFactory.defaultMarker(colorList.get(i))));
             //mMarker.showInfoWindow();
         }
