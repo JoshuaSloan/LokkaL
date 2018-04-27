@@ -48,6 +48,7 @@ public class GroupFragment extends Fragment {
     private OnListFragmentInteractionListener mListener;
     Person acc;
     RecyclerView recyclerView;
+    FloatingActionButton leaveGroup;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -81,14 +82,6 @@ public class GroupFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_group_list, container, false);
 
-        FloatingActionButton leaveGroup = (FloatingActionButton) getView().findViewById(R.id.btnLeave);
-        leaveGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getContext(),"Test Leave",Toast.LENGTH_LONG);
-                Log.d("test","Leave Group");
-            }
-        });
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
@@ -117,6 +110,15 @@ public class GroupFragment extends Fragment {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+/*
+        leaveGroup = (FloatingActionButton) getView().findViewById(R.id.btnLeave);
+        leaveGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(),"Test Leave",Toast.LENGTH_LONG);
+                Log.d("test","Leave Group");
+            }
+        });*/
     }
 
     class sendToDatabase {
@@ -218,7 +220,7 @@ public class GroupFragment extends Fragment {
                         String parts[] = progress.get(i).split(",");
                         acc.myGroup.logm.add(new GroupMember(Integer.valueOf(parts[0]), parts[1], Double.valueOf(parts[2]), Double.valueOf(parts[3]), Double.valueOf(parts[4])));
                         //Log.v("OPU", parts[0] + parts[1] + parts[2]);
-                        Log.v("Output:", parts[0] + parts[1] + parts[2] + parts[3]);
+                        Log.v("Output:", parts[0] + parts[1] + parts[2] + parts[3] + parts[4]);
                     }
                 } catch (Exception e) {
                     Log.v("donetwork", "Error line: onProgressUpdate");
