@@ -97,12 +97,12 @@ public class GroupFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         //Empty the list because we requery it.
-        acc.lof.clear();
+        acc.myGroup.logm.clear();
         URI localuri = null;
         FriendFragment myData;
         //Return Friends
         try {
-            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_friends.php");
+            localuri = new URI("http://www.cs.uwyo.edu/~kfenster/query_groupmembers.php");
             new queryGM().execute(new sendToDatabase(localuri, acc.myGroup.GroupID));
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -206,7 +206,7 @@ public class GroupFragment extends Fragment {
                     //Splits results by CSV values
                     for (int i = 0; i < progress.size(); i++) {
                         String parts[] = progress.get(i).split(",");
-                        acc.myGroup.logm.add(new GroupMember(Integer.valueOf(parts[0]), parts[1], Double.valueOf(parts[2]), Double.valueOf(parts[3])));
+                        acc.myGroup.logm.add(new GroupMember(Integer.valueOf(parts[0]), parts[1], Double.valueOf(parts[2]), Double.valueOf(parts[3]), Double.valueOf(parts[4])));
                         //Log.v("OPU", parts[0] + parts[1] + parts[2]);
                         Log.v("Output:", parts[0] + parts[1] + parts[2] + parts[3]);
                     }

@@ -40,6 +40,7 @@ CREATE TABLE GroupModule_GroupMemberLocation
 	,LocationTime datetime NOT NULL
 	,Latitude DECIMAL(9,6) NOT NULL 
 	,Longitude DECIMAL(9,6) NOT NULL 
+	,BatteryLife DECIMAL(9,6) NOT NULL
 	, Active BIT NULL
 	, CONSTRAINT PK_GroupMemberLocation_GroupMemberLocationID PRIMARY KEY CLUSTERED (GroupMemberLocationID)
     , CONSTRAINT FK_GroupMember_MemberID FOREIGN KEY (GroupMemberID)
