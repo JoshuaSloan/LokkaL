@@ -23,7 +23,18 @@
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
+<<<<<<< HEAD
     tools:context="edu.jsloan3uwyo.lokkal.GroupFragment"
     tools:listitem="@layout/fragment_group" />
 
 </LinearLayout>
+=======
+    android:layout_marginTop="50dp"
+    android:background="#FFFFFF"
+    app:layoutManager="LinearLayoutManager"
+    tools:context="edu.jsloan3uwyo.lokkal.GroupFragment"
+    tools:listitem="@layout/fragment_group">
+
+
+</android.support.v7.widget.RecyclerView>
+>>>>>>> origin/master

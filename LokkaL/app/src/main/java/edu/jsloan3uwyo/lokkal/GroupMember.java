@@ -10,6 +10,8 @@ public class GroupMember {
     String GroupMemberName;
     Double Latitude;
     Double Longitude;
+    Double batLife;
+
 
 
     GroupMember(int gmid, String gmn, double lat, double lon)
