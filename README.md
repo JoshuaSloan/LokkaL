@@ -14,4 +14,4 @@ We have added functionality that allows you to see the battery life of your grou
 
 Take the worry out of your group experiences with LokkaL!
 
-*For more details, please see our [design document](https://github.com/JoshuaSloan/LokkaL/blob/master/Final%20Design%20Document.docx).*
+*For more details, please see our [design document](https://github.com/JoshuaSloan/LokkaL/blob/master/Final%20Design%20Document.pdf).*
